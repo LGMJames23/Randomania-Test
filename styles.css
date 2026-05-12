@@ -1,0 +1,192 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(120deg, #eef6ff, #f9efff);
+  color: #1f2937;
+  line-height: 1.4;
+}
+#creditsLabel{
+font-size: 0.85rem;
+font-weight: 500;
+}
+.app-shell {
+  width: min(1100px, 96vw);
+  margin: 24px auto;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+}
+
+.hero {
+  text-align: center;
+}
+
+.hero h1 {
+  margin-bottom: 8px;
+}
+
+.menu-grid {
+  margin: 16px 0;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+}
+
+button {
+  border: 0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #dbeafe;
+}
+
+button:hover {
+  filter: brightness(0.97);
+}
+
+.screen {
+  display: none;
+  margin-top: 12px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.screen.active {
+  display: block;
+}
+
+.btn-row {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(2, minmax(120px, 1fr));
+  margin-bottom: 8px;
+}
+
+.controls {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+input,
+select {
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+#iconCanvas {
+  margin-top: 12px;
+  position: relative;
+  width: 100%;
+  min-height: 360px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #0f172a;
+}
+
+.icon {
+  position: absolute;
+  user-select: none;
+}
+
+img {
+  max-width: min(420px, 100%);
+  border-radius: 10px;
+}
+
+#quoteOutput,
+#numberOutput,
+#suggestionsInput,
+#cardsOutput,
+#triviaResult,
+#sportFact,
+#diceOutput,
+#usernameOutput,
+#nameOutput,
+#randomGameStatus,
+#aiRollOutput,
+#aiTotalOutput,
+#coinflipOutput {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.dice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(64px, 1fr));
+  gap: 8px;
+  max-width: 420px;
+}
+
+.die-img {
+  width: 64px;
+  height: 64px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+}
+
+.coin-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(78px, 1fr));
+  gap: 8px;
+  max-width: 520px;
+}
+
+.coin-img {
+  width: 76px;
+  height: 76px;
+  border-radius: 999px;
+}
+
+.home-info-card {
+  margin-top: 14px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #eef6ff;
+}
+
+.home-grid {
+  margin-top: 22px;
+  padding-top: 14px;
+  border-top: 1px solid #cbd5e1;
+  grid-template-columns: repeat(4, minmax(150px, 1fr));
+}
+
+#fixedHomeBtn {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  z-index: 1000;
+  width: 75px;
+  height: 75px;
+  border-radius: 999px;
+  padding: 0;
+  font-size: 1.2rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+@media (min-width: 1280px) {
+  .app-shell {
+    width: min(1300px, 94vw);
+    padding: 28px;
+  }
+}
+
+@media (max-width: 900px) {
+  .home-grid {
+    grid-template-columns: repeat(2, minmax(140px, 1fr));
+  }
+}

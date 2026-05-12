@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Randomania Beta</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <button id="fixedHomeBtn" data-screen="home" aria-label="Go home">🏠</button>
+    <main class="app-shell">
+      <header class="hero">
+        <h1 id="title">RANDOMANIA BETA</h1>
+        <p>Originally written in Code.org App Lab
+          BETA VERSION</p>
+      </header>
+
+      <section class="screen active" id="homeScreen">
+        <h2>Home</h2>
+        <p>Select a section from the grid at the bottom.</p>
+        <section class="home-info-card">
+          <h3>Greeting</h3>
+          <p id="homeGreetingLabel">Welcome!</p>
+        </section>
+        <section class="home-info-card">
+          <h3>Time, Date, and Weather</h3>
+          <div class="controls">
+            <select id="locationSelect"></select>
+            <button id="randomLocationBtn">Random City</button>
+            <button id="useMyLocationBtn">Use My Location</button>
+          </div>
+          <p id="homeLocationLabel">Location: --</p>
+          <p id="homeTimeLabel">Time: --:--:--</p>
+          <p id="homeDateLabel">Date: --</p>
+          <p id="homeWeatherLabel">Weather: --</p>
+        </section>
+        <nav class="menu-grid home-grid">
+          <button data-screen="account">Account</button>
+          <button data-screen="games">Random Game</button>
+          <button data-screen="credits">Credits</button>
+          <button data-screen="trivia">Random Trivia</button>
+          <button data-screen="sports">Random Sports</button>
+          <button data-screen="screen">Random Screen</button>
+          <button data-screen="quote">Random Quote</button>
+          <button data-screen="number">Random Number</button>
+          <button data-screen="dice">Random Dice Roll</button>
+          <button data-screen="username">Random Name</button>
+          <button data-screen="coinflip">Random Coin Flip</button>
+          <button data-screen="suggestions">Random Suggestions</button>
+          <button data-screen="cards">Random Cards</button>
+          <button id="randomScreenBtn">Random</button>
+        </nav>
+      </section>
+
+      <section class="screen" id="accountScreen">
+        <h2>Account</h2>
+        <p>Log in with your name or choose a random name.</p>
+        <section class="home-info-card">
+          <p id="activeAccountLabel">Current account: Guest</p>
+          <div class="controls">
+            <input id="newAccountInput" placeholder="Type your name" />
+            <button id="createAccountBtn">Log In</button>
+            <button id="randomAccountBtn">Random Name</button>
+          </div>
+          <div class="controls">
+            <select id="accountSelect"></select>
+            <button id="switchAccountBtn">Use Selected</button>
+          </div>
+          <p id="accountStatusLabel">No account change yet.</p>
+        </section>
+      </section>
+
+      <section class="screen" id="gamesScreen">
+        <h2>Random Game</h2>
+        <p>Pick a random game from your GitHub links and open it in a new tab.</p>
+        <div class="controls">
+          <button id="randomGameBtn">Pick Random Game</button>
+          <button id="openGameBtn">Open Game</button>
+        </div>
+        <p id="randomGameStatus">No game selected yet.</p>
+      </section>
+      <section class="screen" id="creditsScreen">
+        <h2>Credits: </h2>
+        <label id=creditlabel>
+        Developed by James McLaughlin and Amauri Jones;<br>
+          With contributions from Bella Hermann<br>
+        Huge thank you to the Beta testers: Misty Balogh, Parker Beebe, Mike DeRooy, Jonavon Dixon, Lian Dong, Kam Hermann, Matt Hermann, Rhys Horton-Bowen, Shelley Patama, Shanta Perry, Julian Powell, Amy Lamica, Alicia McLaughlin, Pete McLaughlin, Vlad Velychko
+</label>
+      </section>
+      <section class="screen" id="triviaScreen">
+        <h2>Random Trivia</h2>
+        <img id="triviaImage" alt="Trivia hint" />
+        <p id="triviaCategory"></p>
+        <div class="btn-row">
+          <button class="answer-btn"></button>
+          <button class="answer-btn"></button>
+          <button class="answer-btn"></button>
+          <button class="answer-btn"></button>
+        </div>
+        <p id="triviaResult"></p>
+        <button id="nextTriviaBtn">New Question</button>
+      </section>
+
+      <section class="screen" id="sportsScreen">
+        <h2>Random Sport</h2>
+        <img id="sportImage" alt="Sport image" />
+        <p id="sportName"></p>
+        <p id="sportFact"></p>
+        <p><a id="sportVideoLink" href="#" target="_blank" rel="noopener noreferrer">Watch highlights</a></p>
+        <button id="sportBtn">Generate</button>
+      </section>
+
+      <section class="screen" id="screenScreen">
+        <h2>Random Screen</h2>
+        <label class="check">
+          <input type="checkbox" id="iconsToggle" checked />
+          Show floating icons
+        </label>
+        <button id="genIconsBtn">Generate</button>
+        <div id="iconCanvas"></div>
+      </section>
+
+      <section class="screen" id="quoteScreen">
+        <h2>Random Quote</h2>
+        <div class="controls">
+          <select id="quoteType">
+            <option value="Motivational">Motivational</option>
+            <option value="Insult">Insult</option>
+            <option value="Profound">Profound</option>
+          </select>
+          <input id="nameInput" placeholder="Enter Name" />
+          <button id="quoteBtn">Generate Quote</button>
+        </div>
+        <p id="quoteOutput"></p>
+      </section>
+
+      <section class="screen" id="numberScreen">
+        <h2>Random Number</h2>
+        <div class="controls">
+          <input id="lowInput" type="number" value="1" />
+          <input id="highInput" type="number" value="100" />
+          <button id="numberBtn">Generate</button>
+        </div>
+        <p id="numberOutput"></p>
+      </section>
+
+      <section class="screen" id="diceScreen">
+        <h2>Dice Roll</h2>
+        <div class="controls">
+          <input id="diceCountInput" type="number" min="1" max="10" value="1" />
+          <button id="diceBtn">Roll Dice</button>
+          <button id="pigBtn">Play Pig</button>
+        </div>
+        <p>Max dice shown cleanly: 10</p>
+        <p id="diceOutput"></p>
+        <p id="aiDiceOutput"></p>
+        <div id="diceVisuals" class="dice-grid"></div>
+      </section>
+
+      <section class="screen" id="usernameScreen">
+        <h2>Random Username/Name</h2>
+        <div class="controls">
+          <select id="usernameDigitsSelect">
+            <option value="0">0 ending numbers</option>
+            <option value="1">1 ending number</option>
+            <option value="2" selected>2 ending numbers</option>
+            <option value="3">3 ending numbers</option>
+            <option value="4">4 ending numbers</option>
+            <option value="5">5 ending numbers</option>
+          </select>
+          <button id="usernameBtn">Generate Username</button>
+          <button id="nameBtn">Generate Name</button>
+        </div>
+        <p id="usernameOutput"></p>
+        <p id="nameOutput"></p>
+      </section>
+
+      <section class="screen" id="suggestionsScreen">
+        <h2>Random Suggestions</h2>
+        <p id="suggestionsInput"></p>
+        <button id="suggestionsBtn">Add Suggestion</button>
+      </section>
+
+      <section class="screen" id="cardsScreen">
+        <h2>Random Cards</h2>
+        <p id="cardsOutput"></p>
+        <button id="cardsBtn">Generate Cards</button>
+      </section>
+
+      <section class="screen" id="coinflipScreen">
+        <h2>Coin Flip</h2>
+        <div class="controls">
+          <input id="coinflipCountInput" type="number" min="1" max="10" value="1" />
+          <button id="coinflipBtn">Flip Coin</button>
+        </div>
+        <p>Max coin flips shown cleanly: 10</p>
+        <p id="coinflipOutput"></p>
+        <div id="coinflipVisuals" class="coin-grid"></div>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+    <script src="./home-info.js"></script>
+  </body>
+</html>
