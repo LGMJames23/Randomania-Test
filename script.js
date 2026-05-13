@@ -321,18 +321,20 @@ document.addEventListener("DOMContentLoaded", function() {
       let rolls = [];
       const maxRolls = 10;
       let i = 0;
-      showAiTotalOutputElement()
+      showAiTotalOutputElement(0,[]);
       while (total < 100 && rolls.length <= maxRolls && pigPlaying === true) {
         let roll = rand(1, 6);
         total += roll;
+        let rollsTotal;
         if (roll === 1) {
           total = 0;
           rolls = [];
           showAiTotalOutputElement(0, []);
           console.debug("[Debug] playPig rolled a 1 -> bust/reset");
-          break;
-        
-        }
+          break;        
+        } else {
+          rollsTotal = rollsTotal + total
+        };
         rolls.push(roll);
         i++;
         if (i > 20) break; 
@@ -531,7 +533,7 @@ document.addEventListener("DOMContentLoaded", function() {
       ["openGameBtn", "click", openSelectedGame],
       ["pigBtn", "click", function pigBtnHandler() {
           if (pigPlaying) {
-            endPig();
+            playPig();
           } else {
             playPig();
           }
