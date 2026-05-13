@@ -27,11 +27,10 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function showAiTotalOutputElement(aiTotal = 0, aiRolls = []) {
-      const aiTotalElem = document.getElementById("aiTotalOutput");
-      if (aiTotalElem) {
+      const aiTotalElem = document.getElementById("aiTotalOutput"); 
         aiTotalElem.textContent = `Total: ${aiTotal}`;
         aiTotalElem.style.display = "block";
-      }
+      
       const aiRollElem = document.getElementById("aiRollOutput");
       if (aiRollElem && aiRolls.length > 0) {  
         aiRollElem.textContent = `Rolls: ${aiRolls.join(", ")}`;
