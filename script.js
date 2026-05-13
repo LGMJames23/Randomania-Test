@@ -308,8 +308,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     let pigPlaying = false;
     function playPig() {
-      if (pigPlaying === true) {
+      if (pigPlaying == true) {
         console.warn("[Debug] playPig: already playing, exiting.");
+        pigPlaying = false;
+        document.getElementById("pigBtn").textContent = "Play Pig";
+        hideElement("pigBtn");
         return;
       } else {
       pigPlaying = true;
@@ -338,11 +341,7 @@ document.addEventListener("DOMContentLoaded", function() {
         showAiTotalOutputElement(total, rolls); 
       } else {
         showAiTotalOutputElement(0, []);
-      }}
-      if (pigPlaying === false) {
-        endPig();
-      }
-      console.debug("[Debug] playPig rolls:", rolls, "total:", total);
+      }} 
     }
 
     function endPig() {
