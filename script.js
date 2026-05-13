@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigPlaying === true) {
         console.warn("[Debug] playPig: already playing, exiting.");
         return;
-      }
+      } else {
       pigPlaying = true;
       document.getElementById("pigBtn").textContent = "Stop Pig";
       let total = 0;
@@ -328,6 +328,7 @@ document.addEventListener("DOMContentLoaded", function() {
           showAiTotalOutputElement(0, []);
           console.debug("[Debug] playPig rolled a 1 -> bust/reset");
           break;
+        
         }
         rolls.push(roll);
         i++;
@@ -337,7 +338,7 @@ document.addEventListener("DOMContentLoaded", function() {
         showAiTotalOutputElement(total, rolls); 
       } else {
         showAiTotalOutputElement(0, []);
-      }
+      }}
       if (pigPlaying === false) {
         endPig();
       }
@@ -423,7 +424,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function generateUsername() {
       const firstParts = [
-        "Neo", "Pixel", "Shadow", "Turbo", "Lucky", "Nova", "Frost", "Solar", "Echo", "Blaze", "Toilet", "Strong"
+        "Neo", "Pixel", "Shadow", "Turbo", "Lucky", "Nova", "Frost", "Solar", "Echo", "Blaze", "Toilet", "Strong", "Substantial", "Slime"
       ];
       const secondParts = [
         "Rider", "Panda", "Ninja", "Falcon", "Wizard", "Comet", "Otter", "Drift", "Glitch", "Knight", "Panda", "Eagle", "Licker", "Crab", "Rat", "Snake", "Fox", "Wolf", "Bear", "Lion", "Tiger", "Leopard", "Cheetah", "Jaguar", "Panther"
@@ -439,8 +440,8 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function generateName(){
-      const firstNames = ["John", "Jane", "Jim", "Jill", "Jack", "Amauri", "Michael", "Isaac", "Isabella", "James", "Vlad", "Jonesey", "Kanye", "Tyler", "Drake", "Kendrick", "Jermaine", "Kanye", "Tyler", "Drake", "Kendrick", "Cole", "Jose", "Peter", "John", "Jane", "Jim", "Jill", "Jack", "Amauri", "Michael", "Isaac", "Isabella", "James", "Vlad", "Jonesey", "Kanye", "Tyler", "Drake", "Kendrick", "Jermaine", "Kanye", "Tyler", "Drake", "Kendrick", "Cole", "Jose", "Peter"];
-      const lastNames = ["Smith", "Johnson", "Williams", "Cole", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Palmer", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Palmer", "DeRooy", "Harris"];
+      const firstNames = ["John", "Jane", "Jim", "Jill", "Jack", "Amauri", "Michael", "Isaac", "Isabella", "James", "Vlad", "Jonesey", "Kanye", "Tyler", "Drake", "Kendrick", "Jermaine", "Kanye", "Tyler", "Drake", "Kendrick", "Cole", "Jose", "Peter", "John", "Jane", "Jim", "Jill", "Jack", "Amauri", "Michael", "Isaac", "Isabella", "James", "Vlad", "Jonesey", "Kanye", "Tyler", "Drake", "Kendrick", "Jermaine", "Kanye", "Tyler", "Drake", "Kendrick", "Cole", "Jose", "Peter", "Juan", "Fudge"];
+      const lastNames = ["Smith", "Johnson", "Williams", "Cole", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Palmer", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Palmer", "DeRooy", "Harris", "Cabrera", "Walkington III"];
       const name = `${pick(firstNames)} ${pick(lastNames)}`;
       document.getElementById("nameOutput").textContent = name;
       console.debug("[Debug] generateName:", name);
@@ -529,8 +530,16 @@ document.addEventListener("DOMContentLoaded", function() {
       ["coinflipBtn", "click", flipCoin],
       ["randomGameBtn", "click", openRandomGame],
       ["openGameBtn", "click", openSelectedGame],
-      ["pigBtn", "click", playPig]
+      ["pigBtn", "click", function pigBtnHandler() {
+          if (pigPlaying) {
+            endPig();
+          } else {
+            playPig();
+          }
+        },
+      ],
     ];
+
 
     eventBindings.forEach(([id, evt, fn]) => {
       const el = document.getElementById(id);
