@@ -306,43 +306,59 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     let pigPlaying = false;
+
     function playPig() {
-      if (pigPlaying == true) {
-        console.warn("[Debug] playPig: already playing, exiting.");
-        pigPlaying = false;
-        document.getElementById("pigBtn").textContent = "Play Pig";
-        hideElement("pigBtn");
+      if (pigPlaying) {
+        endPig();
         return;
-      } else {
+      }
+
+
       pigPlaying = true;
       document.getElementById("pigBtn").textContent = "Stop Pig";
+      showAiTotalOutputElement(0, []);
       let total = 0;
       let rolls = [];
       const maxRolls = 10;
-      let i = 0;
-      showAiTotalOutputElement(0,[]);
-      while (total < 100 && rolls.length <= maxRolls && pigPlaying === true) {
-        let roll = rand(1, 6);
-        total += roll;
-        let rollsTotal;
-        if (roll === 1) {
-          total = 0;
-          rolls = [];
-          showAiTotalOutputElement(0, []);
-          console.debug("[Debug] playPig rolled a 1 -> bust/reset");
-          break;        
-        } else {
-          rollsTotal = rollsTotal + total
-        };
-        rolls.push(roll);
-        i++;
-        if (i > 20) break; 
+      let finished = false;
+      async function pigTurn() {
+        for (let i = 0; i < maxRolls; ++i) {
+          if (!pigPlaying) {
+            showAiTotalOutputElement(0, []);
+            return;
+          }
+
+          const roll = rand(1, 6);
+
+          rolls.push(roll);
+
+          if (roll === 1) {
+            total = 0;
+            showAiTotalOutputElement(0, rolls);
+            finished = true;
+            console.debug("[Debug] playPig rolled a 1 -> bust/reset");
+            break;
+          } else {
+            total += roll;
+            showAiTotalOutputElement(total, rolls);
+          }
+
+          if (total >= 100) {
+            finished = true;
+            break;
+          }
+
+          await new Promise(res => setTimeout(res, 450));
+        }
+        if (!finished) {
+          showAiTotalOutputElement(total, rolls);
+        }
+        if (pigPlaying) {
+          pigPlaying = false;
+          document.getElementById("pigBtn").textContent = "Play Pig";
+        }
       }
-      if (rolls.length > 0) {
-        showAiTotalOutputElement(total, rolls); 
-      } else {
-        showAiTotalOutputElement(0, []);
-      }} 
+pigTurn();
     }
 
     function endPig() {
@@ -530,14 +546,7 @@ document.addEventListener("DOMContentLoaded", function() {
       ["coinflipBtn", "click", flipCoin],
       ["randomGameBtn", "click", openRandomGame],
       ["openGameBtn", "click", openSelectedGame],
-      ["pigBtn", "click", function pigBtnHandler() {
-          if (pigPlaying) {
-            playPig();
-          } else {
-            playPig();
-          }
-        },
-      ],
+      ["pigBtn", "click", playPig],
     ];
 
 
@@ -552,7 +561,6 @@ document.addEventListener("DOMContentLoaded", function() {
         console.warn(`[Debug] eventBindings: Element with id '${id}' not found`);
       }
     });
-
 
     randomizeTitle();
     showScreen("home");
