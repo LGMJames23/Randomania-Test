@@ -27,9 +27,11 @@ document.addEventListener("DOMContentLoaded", function() {
     const pigHoldBtn = document.getElementById("pigHoldBtn");
     const pigProgress = document.getElementById("pigProgress");
     const pigBtn = document.getElementById("pigBtn");
-    const pigTurnNumLabel = document.getElementById("pigTurnLimitBtn");
-    const pigTimeStat = document.querySelector(".pig-stat--time");
+    function turnLimit(){
     const pigTurnLimit = document.getElementById("pigTurnLimitInput");
+    const pigTurnNumLabel = document.getElementById("pigTurnLimitBtn");
+        }
+    const pigTimeStat = document.querySelector(".pig-stat--time");
     let pigPlaying = false;
     let pigTimerId = null;
     let pigEndsAt = 0;
@@ -371,7 +373,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
       return false;
     }
-
+function 
     function tickPigTimer() {
       if (!pigPlaying) return;
       updatePigHud();
@@ -677,7 +679,7 @@ document.addEventListener("DOMContentLoaded", function() {
       ["pigBtn", "click", playPig],
       ["pigRollBtn", "click", rollPig],
       ["pigHoldBtn", "click", holdPig],
-      ["pigTurnLimitBtn" "click", 
+      ["pigTurnLimitBtn" "click", turnLimit],
       ["suggestionsBtn", "click", addSuggestion],
       ["cardsBtn", "click", generateCards]
     ];
