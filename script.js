@@ -311,9 +311,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigPlaying) {
         endPig();
         return;
-      }
-
-
+      } else {
       pigPlaying = true;
       document.getElementById("pigBtn").textContent = "Stop Pig";
       showAiTotalOutputElement(0, []);
@@ -357,6 +355,7 @@ document.addEventListener("DOMContentLoaded", function() {
           pigPlaying = false;
           document.getElementById("pigBtn").textContent = "Play Pig";
         }
+      }
       }
 pigTurn();
     }
