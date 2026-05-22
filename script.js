@@ -19,25 +19,21 @@ document.addEventListener("DOMContentLoaded", function() {
     };
     console.debug("[Debug] Screens initialized:", screens);
 
-    hideElement(document.getElementById("aiRollOutput"));
-    hideElement(document.getElementById("aiTotalOutput"));
-
-    function hideElement(element) {
-      if(element && element.style) element.style.display = "none";
-    }
-
-    function showAiTotalOutputElement(aiTotal = 0, aiRolls = []) {
-      const aiTotalElem = document.getElementById("aiTotalOutput"); 
-        aiTotalElem.textContent = `Total: ${aiTotal}`;
-        aiTotalElem.style.display = "block";
-      
-      const aiRollElem = document.getElementById("aiRollOutput");
-      if (aiRollElem && aiRolls.length > 0) {  
-        aiRollElem.textContent = `Rolls: ${aiRolls.join(", ")}`;
-        aiRollElem.style.display = "block";
-      }
-      console.debug("[Debug] showAiTotalOutputElement -> aiTotal:", aiTotal, "aiRolls:", aiRolls);
-    }
+    const PIG_GOAL = 100;
+    const PIG_DURATION_MS = 2 * 60 * 1000;
+    const pigPanel = document.getElementById("pigPanel");
+    const pigTimerLabel = document.getElementById("pigTimerLabel");
+    const pigTotalLabel = document.getElementById("pigTotalLabel");
+    const pigTurnLabel = document.getElementById("pigTurnLabel");
+    const pigStatusLabel = document.getElementById("pigStatusLabel");
+    const pigRollBtn = document.getElementById("pigRollBtn");
+    const pigHoldBtn = document.getElementById("pigHoldBtn");
+    let pigPlaying = false;
+    let pigTimerId = null;
+    let pigEndsAt = 0;
+    let pigBanked = 0;
+    let pigTurn = 0;
+    let pigDisplayMsLeft = PIG_DURATION_MS;
 
     const triviaData = [
     ];
@@ -76,6 +72,7 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function pick(list) {
+      if (!list || list.length === 0) return undefined;
       const value = list[rand(0, list.length - 1)];
       console.debug("[Debug] pick from:", list, "->", value);
       return value;
@@ -138,7 +135,13 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function nextTriviaQuestion() {
+      if (!triviaData.length) {
+        document.getElementById("triviaCategory").textContent = "No trivia questions loaded yet.";
+        document.getElementById("triviaResult").textContent = "";
+        return;
+      }
       const item = nextTriviaItem();
+      if (!item) return;
       const options = shuffled(item.options);
       document.getElementById("triviaCategory").textContent = `${item.category}: ${item.question}`;
       setImageWithFallback(document.getElementById("triviaImage"), item.image, fallbackTriviaImage);
@@ -159,6 +162,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function generateSport() {
       const item = pick(sportsData);
+      if (!item) {
+        document.getElementById("sportName").textContent = "No sports data loaded yet.";
+        document.getElementById("sportFact").textContent = "";
+        return;
+      }
       document.getElementById("sportName").textContent = item.sport;
       setImageWithFallback(
         document.getElementById("sportImage"),
@@ -305,67 +313,144 @@ document.addEventListener("DOMContentLoaded", function() {
       console.debug("[Debug] rollDice:", rolls, "total:", total);
     }
 
-    let pigPlaying = false;
+    function formatPigTime(msLeft) {
+      const totalSec = Math.max(0, Math.ceil(msLeft / 1000));
+      const min = Math.floor(totalSec / 60);
+      const sec = totalSec % 60;
+      return `${min}:${String(sec).padStart(2, "0")}`;
+    }
+
+    function updatePigHud() {
+      const msLeft = pigPlaying
+        ? Math.max(0, pigEndsAt - Date.now())
+        : pigDisplayMsLeft;
+      if (pigTimerLabel) pigTimerLabel.textContent = `Time: ${formatPigTime(msLeft)}`;
+      if (pigTotalLabel) pigTotalLabel.textContent = `Total: ${pigBanked} / ${PIG_GOAL}`;
+      if (pigTurnLabel) pigTurnLabel.textContent = `This turn: ${pigTurn}`;
+    }
+
+    function setPigControlsEnabled(enabled) {
+      if (pigRollBtn) pigRollBtn.disabled = !enabled;
+      if (pigHoldBtn) pigHoldBtn.disabled = !enabled;
+    }
+
+    function finishPig(outcome, message) {
+      if (pigTimerId) {
+        clearInterval(pigTimerId);
+        pigTimerId = null;
+      }
+      pigDisplayMsLeft = Math.max(0, pigEndsAt - Date.now());
+      pigPlaying = false;
+      setPigControlsEnabled(false);
+      const pigBtn = document.getElementById("pigBtn");
+      if (pigBtn) pigBtn.textContent = "Play Pig";
+      updatePigHud();
+      if (pigStatusLabel) {
+        pigStatusLabel.textContent = message;
+        pigStatusLabel.dataset.outcome = outcome;
+      }
+      console.debug("[Debug] finishPig:", outcome, message, "banked:", pigBanked);
+    }
+
+    function checkPigWin() {
+      if (pigBanked >= PIG_GOAL) {
+        finishPig("win", `You win! Reached ${pigBanked} before time ran out.`);
+        return true;
+      }
+      return false;
+    }
+
+    function tickPigTimer() {
+      if (!pigPlaying) return;
+      updatePigHud();
+      if (Date.now() >= pigEndsAt) {
+        if (pigBanked >= PIG_GOAL) {
+          finishPig("win", `You win! Reached ${pigBanked} before time ran out.`);
+        } else {
+          finishPig("lose", `Time's up at ${pigBanked}. Need ${PIG_GOAL} to win.`);
+        }
+      }
+    }
+
+    function startPig() {
+      pigBanked = 0;
+      pigTurn = 0;
+      pigDisplayMsLeft = PIG_DURATION_MS;
+      pigPlaying = true;
+      pigEndsAt = Date.now() + PIG_DURATION_MS;
+      if (pigPanel) pigPanel.hidden = false;
+      const pigBtn = document.getElementById("pigBtn");
+      if (pigBtn) pigBtn.textContent = "Stop Pig";
+      setPigControlsEnabled(true);
+      if (pigStatusLabel) {
+        pigStatusLabel.textContent = "Roll to build a turn. Hold to bank. A 1 ends your turn with no points.";
+        delete pigStatusLabel.dataset.outcome;
+      }
+      updatePigHud();
+      if (pigTimerId) clearInterval(pigTimerId);
+      pigTimerId = setInterval(tickPigTimer, 250);
+      console.debug("[Debug] startPig");
+    }
+
+    function endPig(manualStop) {
+      if (!pigPlaying) return;
+      const outcome = manualStop ? "stopped" : "stopped";
+      finishPig(
+        outcome,
+        manualStop
+          ? `Stopped at ${pigBanked} / ${PIG_GOAL}.`
+          : `Stopped at ${pigBanked} / ${PIG_GOAL}.`
+      );
+    }
+
+    function rollPig() {
+      if (!pigPlaying || Date.now() >= pigEndsAt) return;
+      const roll = rand(1, 6);
+      renderDice([roll]);
+      if (roll === 1) {
+        pigTurn = 0;
+        if (pigStatusLabel) {
+          pigStatusLabel.textContent = "Rolled 1 — turn lost. Roll again or Hold when you have points.";
+        }
+        updatePigHud();
+        console.debug("[Debug] rollPig bust on 1");
+        return;
+      }
+      pigTurn += roll;
+      if (pigStatusLabel) {
+        pigStatusLabel.textContent = `Rolled ${roll}. Turn is ${pigTurn}. Hold to bank or keep rolling.`;
+      }
+      updatePigHud();
+      if (pigBanked + pigTurn >= PIG_GOAL) {
+        pigBanked += pigTurn;
+        pigTurn = 0;
+        checkPigWin();
+      }
+      console.debug("[Debug] rollPig:", roll, "banked:", pigBanked, "turn:", pigTurn);
+    }
+
+    function holdPig() {
+      if (!pigPlaying || Date.now() >= pigEndsAt) return;
+      if (pigTurn <= 0) {
+        if (pigStatusLabel) pigStatusLabel.textContent = "Nothing to hold — roll first.";
+        return;
+      }
+      pigBanked += pigTurn;
+      pigTurn = 0;
+      updatePigHud();
+      if (checkPigWin()) return;
+      if (pigStatusLabel) {
+        pigStatusLabel.textContent = `Held! Total is ${pigBanked}. Roll for your next turn.`;
+      }
+      console.debug("[Debug] holdPig banked:", pigBanked);
+    }
 
     function playPig() {
       if (pigPlaying) {
-        endPig();
+        endPig(true);
         return;
-      } else {
-      pigPlaying = true;
-      document.getElementById("pigBtn").textContent = "Stop Pig";
-      showAiTotalOutputElement(0, []);
-      let total = 0;
-      let rolls = [];
-      const maxRolls = 10;
-      let finished = false;
-      async function pigTurn() {
-        for (let i = 0; i < maxRolls; ++i) {
-          if (!pigPlaying) {
-            showAiTotalOutputElement(0, []);
-            return;
-          }
-
-          const roll = rand(1, 6);
-
-          rolls.push(roll);
-
-          if (roll === 1) {
-            total = 0;
-            showAiTotalOutputElement(0, rolls);
-            finished = true;
-            console.debug("[Debug] playPig rolled a 1 -> bust/reset");
-            break;
-          } else {
-            total += roll;
-            showAiTotalOutputElement(total, rolls);
-          }
-
-          if (total >= 100) {
-            finished = true;
-            break;
-          }
-
-          await new Promise(res => setTimeout(res, 450));
-        }
-        if (!finished) {
-          showAiTotalOutputElement(total, rolls);
-        }
-        if (pigPlaying) {
-          pigPlaying = false;
-          document.getElementById("pigBtn").textContent = "Play Pig";
-        }
       }
-      }
-pigTurn();
-    }
-
-    function endPig() {
-      pigPlaying = false;
-      document.getElementById("pigBtn").textContent = "Play Pig";
-      hideElement(document.getElementById("aiRollOutput"));
-      hideElement(document.getElementById("aiTotalOutput"));
-      console.debug("[Debug] endPig -> reset displays");
+      startPig();
     }
 
     function dieFaceSvg(value) {
@@ -439,7 +524,7 @@ pigTurn();
 
     function generateUsername() {
       const firstParts = [
-        "Neo", "Pixel", "Shadow", "Turbo", "Lucky", "Nova", "Frost", "Solar", "Echo", "Blaze", "Toilet", "Strong", "Substantial", "Slime"
+        "Neo", "Pixel", "Shadow", "Turbo", "Lucky", "Nova", "Frost", "Solar", "Echo", "Blaze", "Toilet", "Strong"
       ];
       const secondParts = [
         "Rider", "Panda", "Ninja", "Falcon", "Wizard", "Comet", "Otter", "Drift", "Glitch", "Knight", "Panda", "Eagle", "Licker", "Crab", "Rat", "Snake", "Fox", "Wolf", "Bear", "Lion", "Tiger", "Leopard", "Cheetah", "Jaguar", "Panther"
@@ -455,8 +540,8 @@ pigTurn();
     }
 
     function generateName(){
-      const firstNames = ["John", "Jane", "Jim", "Jill", "Jack", "Amauri", "Michael", "Isaac", "Isabella", "James", "Vlad", "Jonesey", "Kanye", "Tyler", "Drake", "Kendrick", "Jermaine", "Kanye", "Tyler", "Drake", "Kendrick", "Cole", "Jose", "Peter", "John", "Jane", "Jim", "Jill", "Jack", "Amauri", "Michael", "Isaac", "Isabella", "James", "Vlad", "Jonesey", "Kanye", "Tyler", "Drake", "Kendrick", "Jermaine", "Kanye", "Tyler", "Drake", "Kendrick", "Cole", "Jose", "Peter", "Juan", "Fudge"];
-      const lastNames = ["Smith", "Johnson", "Williams", "Cole", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Palmer", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Palmer", "DeRooy", "Harris", "Cabrera", "Walkington III"];
+      const firstNames = ["John", "Jane", "Jim", "Jill", "Jack", "Amauri", "Michael", "Isaac", "Isabella", "James", "Vlad", "Jonesey", "Kanye", "Tyler", "Drake", "Kendrick", "Jermaine", "Kanye", "Tyler", "Drake", "Kendrick", "Cole", "Jose", "Peter", "John", "Jane", "Jim", "Jill", "Jack", "Amauri", "Michael", "Isaac", "Isabella", "James", "Vlad", "Jonesey", "Kanye", "Tyler", "Drake", "Kendrick", "Jermaine", "Kanye", "Tyler", "Drake", "Kendrick", "Cole", "Jose", "Peter"];
+      const lastNames = ["Smith", "Johnson", "Williams", "Cole", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Garcia", "Miller", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Palmer", "Davis", "Rodriguez", "Martinez", "Hernandez", "Lopez", "Gonzalez", "Wilson", "Anderson", "Thomas", "Taylor", "Moore", "Jackson", "Martin", "Lee", "Perez", "Thompson", "White", "Harris", "Sanchez", "Clark", "Ramirez", "Lewis", "Robinson", "Walker", "Young", "Allen", "King", "Wright", "Scott", "Torres", "Nguyen", "Hill", "Flores", "Green", "Adams", "Nelson", "Baker", "Hall", "Rivera", "Campbell", "Mitchell", "Carter", "Roberts", "McLaughlin", "Hermann", "Palmer", "DeRooy", "Harris"];
       const name = `${pick(firstNames)} ${pick(lastNames)}`;
       document.getElementById("nameOutput").textContent = name;
       console.debug("[Debug] generateName:", name);
@@ -532,6 +617,37 @@ pigTurn();
       console.warn("[Debug] randomScreenBtn not found");
     }
 
+    function addSuggestion() {
+      const text = window.prompt("Enter your suggestion:");
+      if (!text || !text.trim()) return;
+      let suggestions = [];
+      try {
+        const raw = localStorage.getItem("Randomania Suggestions");
+        const parsed = raw ? JSON.parse(raw) : [];
+        suggestions = Array.isArray(parsed) ? parsed : [];
+      } catch (_err) {
+        suggestions = [];
+      }
+      suggestions.push(text.trim());
+      localStorage.setItem("Randomania Suggestions", JSON.stringify(suggestions));
+      const label = document.getElementById("suggestionsInput");
+      if (label) {
+        label.textContent = `Saved ${suggestions.length} suggestion(s). Latest: ${text.trim()}`;
+      }
+    }
+
+    function generateCards() {
+      const suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
+      const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+      const count = rand(1, 5);
+      const cards = [];
+      for (let i = 0; i < count; i += 1) {
+        cards.push(`${pick(ranks)} of ${pick(suits)}`);
+      }
+      const output = document.getElementById("cardsOutput");
+      if (output) output.textContent = cards.join(", ");
+    }
+
     const eventBindings = [
       ["nextTriviaBtn", "click", nextTriviaQuestion],
       ["sportBtn", "click", generateSport],
@@ -546,8 +662,11 @@ pigTurn();
       ["randomGameBtn", "click", openRandomGame],
       ["openGameBtn", "click", openSelectedGame],
       ["pigBtn", "click", playPig],
+      ["pigRollBtn", "click", rollPig],
+      ["pigHoldBtn", "click", holdPig],
+      ["suggestionsBtn", "click", addSuggestion],
+      ["cardsBtn", "click", generateCards]
     ];
-
 
     eventBindings.forEach(([id, evt, fn]) => {
       const el = document.getElementById(id);
@@ -560,6 +679,7 @@ pigTurn();
         console.warn(`[Debug] eventBindings: Element with id '${id}' not found`);
       }
     });
+
 
     randomizeTitle();
     showScreen("home");
