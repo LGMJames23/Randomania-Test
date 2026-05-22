@@ -30,12 +30,14 @@ document.addEventListener("DOMContentLoaded", function() {
     const pigHoldBtn = document.getElementById("pigHoldBtn");
     const pigProgress = document.getElementById("pigProgress");
     const pigBtn = document.getElementById("pigBtn");
+    const pigTurnNumLabel = document.getElementById("pigTurnLimitBtn");
     const pigTimeStat = document.querySelector(".pig-stat--time");
     let pigPlaying = false;
     let pigTimerId = null;
     let pigEndsAt = 0;
     let pigBanked = 0;
     let pigTurn = 0;
+    let pigTurnNum = 0;
     let pigDisplayMsLeft = PIG_DURATION_MS;
 
     const triviaData = [
@@ -336,6 +338,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigTimerLabel) pigTimerLabel.textContent = formatPigTime(msLeft);
       if (pigTotalLabel) pigTotalLabel.textContent = `${pigBanked} / ${PIG_GOAL}`;
       if (pigTurnLabel) pigTurnLabel.textContent = String(pigTurn);
+      if (pigTurnNumLabel) pigTurnNumLabel.textContent = String(pigTurnNum);
       if (pigTimeStat) pigTimeStat.classList.toggle("pig-stat--urgent", pigPlaying && msLeft <= 20000);
       syncPigPanelChrome();
     }
@@ -349,6 +352,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigTimerId) {
         clearInterval(pigTimerId);
         pigTimerId = null;
+        pigTurnNum = 0;
       }
       pigDisplayMsLeft = Math.max(0, pigEndsAt - Date.now());
       pigPlaying = false;
@@ -373,7 +377,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function tickPigTimer() {
       if (!pigPlaying) return;
       updatePigHud();
-      if (Date.now() >= pigEndsAt) {
+      if (Date.now() >= pigEndsAt && ) {
         if (pigBanked >= PIG_GOAL) {
           finishPig("win", `You win! Reached ${pigBanked} before time ran out.`);
         } else {
@@ -391,7 +395,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigBtn) pigBtn.textContent = "Stop Pig";
       setPigControlsEnabled(true);
       if (pigStatusLabel) {
-        pigStatusLabel.textContent = "Roll to build a turn. Hold to bank. A 1 ends your turn with no points.";
+        pigStatusLabel.textContent = "Roll to build a turn. Hold to keep your numbers, but lose a turn. A 1 ends your turn with no points.";
         delete pigStatusLabel.dataset.outcome;
       }
       updatePigHud();
@@ -420,6 +424,7 @@ document.addEventListener("DOMContentLoaded", function() {
         pigTurn = 0;
         if (pigStatusLabel) {
           pigStatusLabel.textContent = "Rolled 1 — turn lost. Roll again or Hold when you have points.";
+        pigTurnNum = pigTurnNum++;
         }
         updatePigHud();
         console.debug("[Debug] rollPig bust on 1");
@@ -673,6 +678,7 @@ document.addEventListener("DOMContentLoaded", function() {
       ["pigBtn", "click", playPig],
       ["pigRollBtn", "click", rollPig],
       ["pigHoldBtn", "click", holdPig],
+      ["pigTurnLimitBtn" "click", 
       ["suggestionsBtn", "click", addSuggestion],
       ["cardsBtn", "click", generateCards]
     ];
