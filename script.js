@@ -336,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigTimerLabel) pigTimerLabel.textContent = formatPigTime(msLeft);
       if (pigTotalLabel) pigTotalLabel.textContent = `${pigBanked} / ${PIG_GOAL}`;
       if (pigTurnLabel) pigTurnLabel.textContent = String(pigTurn);
-      if (pigTimeStat) pigTimeStat.classList.toggle("pig-stat--urgent", pigPlaying && msLeft <= 30000);
+      if (pigTimeStat) pigTimeStat.classList.toggle("pig-stat--urgent", pigPlaying && msLeft <= 20000);
       syncPigPanelChrome();
     }
 
