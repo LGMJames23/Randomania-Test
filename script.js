@@ -377,11 +377,11 @@ function
     function tickPigTimer() {
       if (!pigPlaying) return;
       updatePigHud();
-      if (Date.now() >= pigEndsAt && ) {
+      if (Date.now() >= pigEndsAt || pigTurnNum > turnLimit) {
         if (pigBanked >= PIG_GOAL) {
           finishPig("win", `You win! Reached ${pigBanked} before time ran out.`);
         } else {
-          finishPig("lose", `Time's up at ${pigBanked}. Need ${PIG_GOAL} to win.`);
+          finishPig("You lose :(", `Time's up at ${pigBanked}. You needed ${PIG_GOAL} to win.`);
         }
       }
     }
@@ -389,6 +389,7 @@ function
     function startPig() {
       pigBanked = 0;
       pigTurn = 0;
+    pigTurnNum = 0;
       pigDisplayMsLeft = PIG_DURATION_MS;
       pigPlaying = true;
       pigEndsAt = Date.now() + PIG_DURATION_MS;
@@ -424,7 +425,7 @@ function
         pigTurn = 0;
         if (pigStatusLabel) {
           pigStatusLabel.textContent = "Rolled 1 — turn lost. Roll again or Hold when you have points.";
-        pigTurnNum = pigTurnNum++;
+        pigTurnNum++;
         }
         updatePigHud();
         console.debug("[Debug] rollPig bust on 1");
@@ -436,7 +437,7 @@ function
       }
       updatePigHud();
       if (pigBanked + pigTurn >= PIG_GOAL) {
-        pigBanked += pigTurn;
+        pigBanked += pigTurn
         pigTurn = 0;
         checkPigWin();
       }
@@ -444,13 +445,13 @@ function
     }
 
     function holdPig() {
+        pigTurnNum++;
       if (!pigPlaying || Date.now() >= pigEndsAt) return;
       if (pigTurn <= 0) {
         if (pigStatusLabel) pigStatusLabel.textContent = "Nothing to hold — roll first.";
         return;
       }
       pigBanked += pigTurn;
-      pigTurnNum = pigTurnNum++;
       pigTurn = 0;
       updatePigHud();
       if (checkPigWin()) return;
