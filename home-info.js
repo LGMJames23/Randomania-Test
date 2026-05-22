@@ -274,12 +274,3 @@ populateLocationSelect();
 initAccounts();
 locationSelect.value = "0";
 setActiveLocation(cityOptions[0]);
-function getSuggestions() {
-  getSuggestionsBtn.addEventListener("click", () => {
-    let suggestions = [];
-    suggestions = JSON.parse(localStorage.getItem("Randomania Suggestions"));
-    suggestions.push(document.getElementById("suggestionsInput").textContent);
-    suggestions = suggestion + suggestions;
-    localStorage.setItem("Randomania Suggestions", JSON.stringify(suggestions));
-});
-}

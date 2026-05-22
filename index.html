@@ -81,10 +81,10 @@
       </section>
       <section class="screen" id="creditsScreen">
         <h2>Credits: </h2>
-        <label id=creditlabel>
+        <label id="creditLabel">
         Developed by James McLaughlin and Amauri Jones;<br>
           With contributions from Bella Hermann<br>
-        Huge thank you to the Beta testers: Misty Balogh, Parker Beebe, Mike DeRooy, Jonavon Dixon, Lian Dong, Kam Hermann, Matt Hermann, Rhys Horton-Bowen, Shelley Patama, Shanta Perry, Julian Powell, Amy Lamica, Alicia McLaughlin, Pete McLaughlin, Vlad Velychko
+        Huge thank you to the Beta testers: Misty Balogh, Mark Berti, Parker Beebe, Mike DeRooy, Jonavon Dixon, Lian Dong, Kam Hermann, Matt Hermann, Rhys Horton-Bowen, Shelley Patama, Shanta Perry, Julian Powell, Amy Lamica, Alicia McLaughlin, Pete McLaughlin, Vlad Velychko
 </label>
       </section>
       <section class="screen" id="triviaScreen">
@@ -146,15 +146,51 @@
 
       <section class="screen" id="diceScreen">
         <h2>Dice Roll</h2>
-        <div class="controls">
-          <input id="diceCountInput" type="number" min="1" max="10" value="1" />
-          <button id="diceBtn">Roll Dice</button>
-          <button id="pigBtn">Play Pig</button>
+        <div class="controls dice-controls">
+          <input id="diceCountInput" type="number" min="1" max="10" value="1" aria-label="Number of dice" />
+          <button id="diceBtn" type="button">Roll Dice</button>
+          <button id="pigBtn" type="button" class="pig-btn">Play Pig</button>
         </div>
-        <p>Max dice shown cleanly: 10</p>
+        <p class="screen-hint">Max dice shown cleanly: 10</p>
         <p id="diceOutput"></p>
-        <p id="aiDiceOutput"></p>
-        <div id="diceVisuals" class="dice-grid"></div>
+        <div id="diceVisuals" class="dice-grid" aria-label="Dice results"></div>
+
+        <section id="pigPanel" class="pig-panel" aria-labelledby="pigHeading">
+          <header class="pig-header">
+            <h3 id="pigHeading">Pig — reach 100 in 2:00</h3>
+            <p class="pig-rules">
+              Roll to build points for this turn, then <strong>Hold</strong> to bank them.
+              A roll of <strong>1</strong> clears your turn. Reach <strong>100</strong> banked before the timer hits zero.
+            </p>
+          </header>
+
+          <div class="pig-hud" role="group" aria-label="Pig game stats">
+            <div class="pig-stat pig-stat--time">
+              <span class="pig-stat-label">Time</span>
+              <span id="pigTimerLabel" class="pig-stat-value">2:00</span>
+            </div>
+            <div class="pig-stat pig-stat--total">
+              <span class="pig-stat-label">Total</span>
+              <span id="pigTotalLabel" class="pig-stat-value">0 / 100</span>
+            </div>
+            <div class="pig-stat pig-stat--turn">
+              <span class="pig-stat-label">This turn</span>
+              <span id="pigTurnLabel" class="pig-stat-value">0</span>
+            </div>
+          </div>
+
+          <label class="pig-progress-label" for="pigProgress">Progress to 100</label>
+          <progress id="pigProgress" class="pig-progress" max="100" value="0"></progress>
+
+          <p id="pigStatusLabel" class="pig-status" role="status" aria-live="polite">
+            Press <strong>Play Pig</strong> to start the 2-minute challenge.
+          </p>
+
+          <div class="controls pig-controls">
+            <button id="pigRollBtn" type="button" class="pig-action pig-action--roll" disabled>Roll</button>
+            <button id="pigHoldBtn" type="button" class="pig-action pig-action--hold" disabled>Hold</button>
+          </div>
+        </section>
       </section>
 
       <section class="screen" id="usernameScreen">

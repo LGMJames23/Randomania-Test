@@ -28,6 +28,9 @@ document.addEventListener("DOMContentLoaded", function() {
     const pigStatusLabel = document.getElementById("pigStatusLabel");
     const pigRollBtn = document.getElementById("pigRollBtn");
     const pigHoldBtn = document.getElementById("pigHoldBtn");
+    const pigProgress = document.getElementById("pigProgress");
+    const pigBtn = document.getElementById("pigBtn");
+    const pigTimeStat = document.querySelector(".pig-stat--time");
     let pigPlaying = false;
     let pigTimerId = null;
     let pigEndsAt = 0;
@@ -320,13 +323,21 @@ document.addEventListener("DOMContentLoaded", function() {
       return `${min}:${String(sec).padStart(2, "0")}`;
     }
 
+    function syncPigPanelChrome() {
+      if (pigPanel) pigPanel.classList.toggle("pig-panel--playing", pigPlaying);
+      if (pigBtn) pigBtn.classList.toggle("pig-btn--stop", pigPlaying);
+      if (pigProgress) pigProgress.value = Math.min(PIG_GOAL, pigBanked);
+    }
+
     function updatePigHud() {
       const msLeft = pigPlaying
         ? Math.max(0, pigEndsAt - Date.now())
         : pigDisplayMsLeft;
-      if (pigTimerLabel) pigTimerLabel.textContent = `Time: ${formatPigTime(msLeft)}`;
-      if (pigTotalLabel) pigTotalLabel.textContent = `Total: ${pigBanked} / ${PIG_GOAL}`;
-      if (pigTurnLabel) pigTurnLabel.textContent = `This turn: ${pigTurn}`;
+      if (pigTimerLabel) pigTimerLabel.textContent = formatPigTime(msLeft);
+      if (pigTotalLabel) pigTotalLabel.textContent = `${pigBanked} / ${PIG_GOAL}`;
+      if (pigTurnLabel) pigTurnLabel.textContent = String(pigTurn);
+      if (pigTimeStat) pigTimeStat.classList.toggle("pig-stat--urgent", pigPlaying && msLeft <= 30000);
+      syncPigPanelChrome();
     }
 
     function setPigControlsEnabled(enabled) {
@@ -342,7 +353,6 @@ document.addEventListener("DOMContentLoaded", function() {
       pigDisplayMsLeft = Math.max(0, pigEndsAt - Date.now());
       pigPlaying = false;
       setPigControlsEnabled(false);
-      const pigBtn = document.getElementById("pigBtn");
       if (pigBtn) pigBtn.textContent = "Play Pig";
       updatePigHud();
       if (pigStatusLabel) {
@@ -378,8 +388,6 @@ document.addEventListener("DOMContentLoaded", function() {
       pigDisplayMsLeft = PIG_DURATION_MS;
       pigPlaying = true;
       pigEndsAt = Date.now() + PIG_DURATION_MS;
-      if (pigPanel) pigPanel.hidden = false;
-      const pigBtn = document.getElementById("pigBtn");
       if (pigBtn) pigBtn.textContent = "Stop Pig";
       setPigControlsEnabled(true);
       if (pigStatusLabel) {
@@ -387,6 +395,7 @@ document.addEventListener("DOMContentLoaded", function() {
         delete pigStatusLabel.dataset.outcome;
       }
       updatePigHud();
+      syncPigPanelChrome();
       if (pigTimerId) clearInterval(pigTimerId);
       pigTimerId = setInterval(tickPigTimer, 250);
       console.debug("[Debug] startPig");
@@ -681,6 +690,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
 
+    syncPigPanelChrome();
     randomizeTitle();
     showScreen("home");
     generateSport();

@@ -9,9 +9,11 @@ body {
   color: #1f2937;
   line-height: 1.4;
 }
-#creditsLabel{
-font-size: 0.85rem;
-font-weight: 500;
+#creditLabel {
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: block;
+  line-height: 1.5;
 }
 .app-shell {
   width: min(1100px, 96vw);
@@ -115,11 +117,171 @@ img {
 #usernameOutput,
 #nameOutput,
 #randomGameStatus,
-#aiRollOutput,
-#aiTotalOutput,
 #coinflipOutput {
   font-size: 1.1rem;
   font-weight: 600;
+}
+
+.screen-hint {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  filter: none;
+}
+
+.pig-panel {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 2px solid #fdba74;
+  background: linear-gradient(180deg, #fff7ed 0%, #ffedd5 100%);
+}
+
+.pig-panel--playing {
+  border-color: #f97316;
+  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.15);
+}
+
+.pig-header h3 {
+  margin: 0 0 8px;
+}
+
+.pig-rules {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #7c2d12;
+  line-height: 1.45;
+}
+
+.pig-hud {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0 10px;
+}
+
+.pig-stat {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #fed7aa;
+  text-align: center;
+}
+
+.pig-stat-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #9a3412;
+}
+
+.pig-stat-value {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.pig-stat--time.pig-stat--urgent .pig-stat-value {
+  color: #b91c1c;
+}
+
+.pig-stat--total .pig-stat-value {
+  color: #c2410c;
+}
+
+.pig-progress-label {
+  display: block;
+  margin: 0 0 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #9a3412;
+}
+
+.pig-progress {
+  width: 100%;
+  height: 14px;
+  margin-bottom: 12px;
+  border: 0;
+  border-radius: 999px;
+  overflow: hidden;
+  appearance: none;
+}
+
+.pig-progress::-webkit-progress-bar {
+  background: #fed7aa;
+  border-radius: 999px;
+}
+
+.pig-progress::-webkit-progress-value {
+  background: linear-gradient(90deg, #fb923c, #ea580c);
+  border-radius: 999px;
+}
+
+.pig-progress::-moz-progress-bar {
+  background: linear-gradient(90deg, #fb923c, #ea580c);
+  border-radius: 999px;
+}
+
+.pig-status {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  line-height: 1.4;
+  background: #fff;
+  border: 1px solid #fed7aa;
+  color: #1f2937;
+}
+
+.pig-status[data-outcome="win"] {
+  background: #dcfce7;
+  border-color: #86efac;
+  color: #14532d;
+}
+
+.pig-status[data-outcome="lose"] {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #7f1d1d;
+}
+
+.pig-status[data-outcome="stopped"] {
+  background: #e0f2fe;
+  border-color: #7dd3fc;
+  color: #0c4a6e;
+}
+
+.pig-controls {
+  margin-bottom: 0;
+}
+
+.pig-action--roll {
+  background: #bfdbfe;
+}
+
+.pig-action--hold {
+  background: #bbf7d0;
+}
+
+.pig-btn--stop {
+  background: #fecaca;
+  color: #7f1d1d;
+}
+
+@media (max-width: 560px) {
+  .pig-hud {
+    grid-template-columns: 1fr;
+  }
 }
 
 .dice-grid {
