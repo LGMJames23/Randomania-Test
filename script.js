@@ -1,6 +1,4 @@
-
 document.addEventListener("DOMContentLoaded", function() {
-
     const screens = {
       home: document.getElementById("homeScreen"),
       account: document.getElementById("accountScreen"),
@@ -18,7 +16,6 @@ document.addEventListener("DOMContentLoaded", function() {
       cards: document.getElementById("cardsScreen")
     };
     console.debug("[Debug] Screens initialized:", screens);
-
     const PIG_GOAL = 100;
     const PIG_DURATION_MS = 1 * 60 * 1000;
     const pigPanel = document.getElementById("pigPanel");
@@ -32,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const pigBtn = document.getElementById("pigBtn");
     const pigTurnNumLabel = document.getElementById("pigTurnLimitBtn");
     const pigTimeStat = document.querySelector(".pig-stat--time");
+    const pigTurnLimit = document.getElementById("pigTurnLimitInput");
     let pigPlaying = false;
     let pigTimerId = null;
     let pigEndsAt = 0;
@@ -284,7 +282,7 @@ document.addEventListener("DOMContentLoaded", function() {
           "You",
           "42",
           "Happiness",
-          "Emptiness",
+          "Emptiness"
         ];
         result = `${pick(firstWordList)}${pick(secondWordList)}${pick(thirdWordList)}, ${name}!`;
       }
@@ -338,7 +336,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigTimerLabel) pigTimerLabel.textContent = formatPigTime(msLeft);
       if (pigTotalLabel) pigTotalLabel.textContent = `${pigBanked} / ${PIG_GOAL}`;
       if (pigTurnLabel) pigTurnLabel.textContent = String(pigTurn);
-      if (pigTurnNumLabel) pigTurnNumLabel.textContent = String(pigTurnNum);
+      if (pigTurnNumLabel) pigTurnNumLabel.textContent = `${pigTurnNum} / 
       if (pigTimeStat) pigTimeStat.classList.toggle("pig-stat--urgent", pigPlaying && msLeft <= 20000);
       syncPigPanelChrome();
     }
@@ -450,6 +448,7 @@ document.addEventListener("DOMContentLoaded", function() {
         return;
       }
       pigBanked += pigTurn;
+      pigTurnNum = pigTurnNum++;
       pigTurn = 0;
       updatePigHud();
       if (checkPigWin()) return;
