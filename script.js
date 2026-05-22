@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
     console.debug("[Debug] Screens initialized:", screens);
 
     const PIG_GOAL = 100;
-    const PIG_DURATION_MS = 2 * 60 * 1000;
+    const PIG_DURATION_MS = 1 * 60 * 1000;
     const pigPanel = document.getElementById("pigPanel");
     const pigTimerLabel = document.getElementById("pigTimerLabel");
     const pigTotalLabel = document.getElementById("pigTotalLabel");
@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function() {
       const totalSec = Math.max(0, Math.ceil(msLeft / 1000));
       const min = Math.floor(totalSec / 60);
       const sec = totalSec % 60;
-      return `${min}:${String(sec).padStart(1, "0")}`;
+      return `${min}:${String(sec).padStart(2, "0")}`;
     }
 
     function syncPigPanelChrome() {
