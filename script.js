@@ -320,7 +320,7 @@ document.addEventListener("DOMContentLoaded", function() {
       const totalSec = Math.max(0, Math.ceil(msLeft / 1000));
       const min = Math.floor(totalSec / 60);
       const sec = totalSec % 60;
-      return `${min}:${String(sec).padStart(2, "0")}`;
+      return `${min}:${String(sec).padStart(1, "0")}`;
     }
 
     function syncPigPanelChrome() {
