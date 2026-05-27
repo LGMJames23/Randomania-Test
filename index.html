@@ -157,7 +157,7 @@
 
         <section id="pigPanel" class="pig-panel" aria-labelledby="pigHeading">
           <header class="pig-header">
-            <h3 id="pigHeading">Pig — reach 100 in 1:00</h3>
+            <h3 id="pigHeading">Pig — reach 100 in 2:00</h3>
             <p class="pig-rules">
               Roll to build points for this turn, then <strong>Hold</strong> to bank them.
               A roll of <strong>1</strong> clears your turn. Reach <strong>100</strong> banked before the timer hits zero.
@@ -167,16 +167,12 @@
           <div class="pig-hud" role="group" aria-label="Pig game stats">
             <div class="pig-stat pig-stat--time">
               <span class="pig-stat-label">Time</span>
-              <span id="pigTimerLabel" class="pig-stat-value">1:00</span>
+              <span id="pigTimerLabel" class="pig-stat-value">2:00</span>
             </div>
             <div class="pig-stat pig-stat--total">
               <span class="pig-stat-label">Total</span>
               <span id="pigTotalLabel" class="pig-stat-value">0 / 100</span>
             </div>
-            <div class="pig-stat pig-stat--turnNum">
-              <span class="pig-stat-label">Turn Number</span>
-              <span id="pigTurnNumLabel" class="pig-stat-value">0</span>
-              </div>
             <div class="pig-stat pig-stat--turn">
               <span class="pig-stat-label">This turn</span>
               <span id="pigTurnLabel" class="pig-stat-value">0</span>
@@ -193,8 +189,6 @@
           <div class="controls pig-controls">
             <button id="pigRollBtn" type="button" class="pig-action pig-action--roll" disabled>Roll</button>
             <button id="pigHoldBtn" type="button" class="pig-action pig-action--hold" disabled>Hold</button>
-            <button id="pigTurnBtn" type="button" class="pig-action pig-action--toggleturn" disabled>Enable Turn Limit</button>
-            <input id="pigTurnInput" type="number" placeholder=
           </div>
         </section>
       </section>
@@ -205,7 +199,7 @@
           <select id="usernameDigitsSelect">
             <option value="0">0 ending numbers</option>
             <option value="1">1 ending number</option>
-            <option value="2">2 ending numbers</option>
+            <option value="2" selected>2 ending numbers</option>
             <option value="3">3 ending numbers</option>
             <option value="4">4 ending numbers</option>
             <option value="5">5 ending numbers</option>
@@ -219,7 +213,7 @@
 
       <section class="screen" id="suggestionsScreen">
         <h2>Random Suggestions</h2>
-        <input id="suggestionsInput" type="string" placeholder="ENTER SUGGESTION HERE!"/>
+        <p id="suggestionsInput"></p>
         <button id="suggestionsBtn">Add Suggestion</button>
       </section>
 

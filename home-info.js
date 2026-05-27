@@ -35,6 +35,7 @@ const activeAccountLabel = document.getElementById("activeAccountLabel");
 const homeGreetingLabel = document.getElementById("homeGreetingLabel");
 
 function populateLocationSelect() {
+  if (!locationSelect) return;
   cityOptions.forEach((city, idx) => {
     const option = document.createElement("option");
     option.value = String(idx);
@@ -83,6 +84,7 @@ function saveAccounts(accounts) {
 }
 
 function updateGreeting(timeZone) {
+  if (!homeGreetingLabel) return;
   const dateParts = new Intl.DateTimeFormat("en-US", {
     timeZone,
     hour: "numeric",
@@ -96,11 +98,12 @@ function updateGreeting(timeZone) {
 function setActiveAccount(name) {
   activeAccount = name;
   localStorage.setItem(ACTIVE_ACCOUNT_STORAGE_KEY, name);
-  activeAccountLabel.textContent = `Current account: ${name}`;
+  if (activeAccountLabel) activeAccountLabel.textContent = `Current account: ${name}`;
   updateGreeting(activeLocation.timeZone);
 }
 
 function renderAccountSelect(accounts) {
+  if (!accountSelect) return;
   accountSelect.innerHTML = "";
   accounts.forEach((accountName) => {
     const option = document.createElement("option");
@@ -115,7 +118,7 @@ function initAccounts() {
   renderAccountSelect(accounts);
   const savedActive = localStorage.getItem(ACTIVE_ACCOUNT_STORAGE_KEY);
   const initialActive = savedActive && accounts.includes(savedActive) ? savedActive : accounts[0];
-  accountSelect.value = initialActive;
+  if (accountSelect) accountSelect.value = initialActive;
   setActiveAccount(initialActive);
 }
 
@@ -159,7 +162,7 @@ async function updateWeather(location) {
   const weatherUrl =
     `https://api.open-meteo.com/v1/forecast?latitude=${location.latitude}` +
     `&longitude=${location.longitude}&current=temperature_2m,weather_code&timezone=auto`;
-  homeWeatherLabel.textContent = "Weather: Loading...";
+  if (homeWeatherLabel) homeWeatherLabel.textContent = "Weather: Loading...";
   try {
     const response = await fetch(weatherUrl);
     if (!response.ok) throw new Error("Weather request failed");
@@ -169,13 +172,15 @@ async function updateWeather(location) {
     const weather = weatherTextFromCode(code);
     if (typeof tempC === "number") {
       const tempF = (tempC * 9) / 5 + 32;
-      homeWeatherLabel.textContent =
-        `Weather: ${weather}, ${tempF.toFixed(1)}°F (${tempC.toFixed(1)}°C)`;
+      if (homeWeatherLabel) {
+        homeWeatherLabel.textContent =
+          `Weather: ${weather}, ${tempF.toFixed(1)}°F (${tempC.toFixed(1)}°C)`;
+      }
     } else {
-      homeWeatherLabel.textContent = `Weather: ${weather}`;
+      if (homeWeatherLabel) homeWeatherLabel.textContent = `Weather: ${weather}`;
     }
   } catch (_err) {
-    homeWeatherLabel.textContent = "Weather: Unable to load right now";
+    if (homeWeatherLabel) homeWeatherLabel.textContent = "Weather: Unable to load right now";
   }
 }
 
@@ -184,8 +189,8 @@ function startClock(location) {
   const tick = () => {
     const now = new Date();
     const formatted = formatClock(now, location.timeZone);
-    homeTimeLabel.textContent = `Time: ${formatted.time}`;
-    homeDateLabel.textContent = `Date: ${formatted.day}`;
+    if (homeTimeLabel) homeTimeLabel.textContent = `Time: ${formatted.time}`;
+    if (homeDateLabel) homeDateLabel.textContent = `Date: ${formatted.day}`;
     updateGreeting(location.timeZone);
   };
   tick();
@@ -193,18 +198,19 @@ function startClock(location) {
 }
 
 function setActiveLocation(location) {
+  if (!location) return;
   activeLocation = location;
-  homeLocationLabel.textContent = `Location: ${location.name}`;
+  if (homeLocationLabel) homeLocationLabel.textContent = `Location: ${location.name}`;
   startClock(location);
   updateWeather(location);
 }
 
 async function useCurrentLocation() {
   if (!navigator.geolocation) {
-    homeWeatherLabel.textContent = "Weather: Geolocation is not supported on this browser";
+    if (homeWeatherLabel) homeWeatherLabel.textContent = "Weather: Geolocation is not supported on this browser";
     return;
   }
-  homeLocationLabel.textContent = "Location: Getting your location...";
+  if (homeLocationLabel) homeLocationLabel.textContent = "Location: Getting your location...";
   navigator.geolocation.getCurrentPosition(
     async (position) => {
       const { latitude, longitude } = position.coords;
@@ -217,28 +223,33 @@ async function useCurrentLocation() {
       setActiveLocation(location);
     },
     () => {
-      homeLocationLabel.textContent = "Location: Permission denied or unavailable";
+      if (homeLocationLabel) homeLocationLabel.textContent = "Location: Permission denied or unavailable";
       setActiveLocation(activeLocation);
     },
     { enableHighAccuracy: true, timeout: 10000 }
   );
 }
 
-locationSelect.addEventListener("change", () => {
-  const idx = Number(locationSelect.value);
-  setActiveLocation(cityOptions[idx]);
-});
+if (locationSelect) {
+  locationSelect.addEventListener("change", () => {
+    const idx = Number(locationSelect.value);
+    const selected = cityOptions[idx];
+    if (selected) setActiveLocation(selected);
+  });
+}
 
-randomLocationBtn.addEventListener("click", () => {
-  const idx = Math.floor(Math.random() * cityOptions.length);
-  locationSelect.value = String(idx);
-  setActiveLocation(cityOptions[idx]);
-});
+if (randomLocationBtn) {
+  randomLocationBtn.addEventListener("click", () => {
+    const idx = Math.floor(Math.random() * cityOptions.length);
+    if (locationSelect) locationSelect.value = String(idx);
+    setActiveLocation(cityOptions[idx]);
+  });
+}
 
-useMyLocationBtn.addEventListener("click", useCurrentLocation);
-accountSelect.addEventListener("change", () => setActiveAccount(accountSelect.value));
-createAccountBtn.addEventListener("click", () => {
-  const nextName = newAccountInput.value.trim();
+if (useMyLocationBtn) useMyLocationBtn.addEventListener("click", useCurrentLocation);
+if (accountSelect) accountSelect.addEventListener("change", () => setActiveAccount(accountSelect.value));
+if (createAccountBtn) createAccountBtn.addEventListener("click", () => {
+  const nextName = (newAccountInput?.value || "").trim().slice(0, 32);
   if (!nextName) return;
   const accounts = loadAccounts();
   if (!accounts.includes(nextName)) {
@@ -246,18 +257,18 @@ createAccountBtn.addEventListener("click", () => {
     saveAccounts(accounts);
     renderAccountSelect(accounts);
   }
-  accountSelect.value = nextName;
+  if (accountSelect) accountSelect.value = nextName;
   setActiveAccount(nextName);
-  newAccountInput.value = "";
-  accountStatusLabel.textContent = `Logged in as ${nextName}.`;
+  if (newAccountInput) newAccountInput.value = "";
+  if (accountStatusLabel) accountStatusLabel.textContent = `Logged in as ${nextName}.`;
 });
-switchAccountBtn.addEventListener("click", () => {
-  const selected = accountSelect.value;
+if (switchAccountBtn) switchAccountBtn.addEventListener("click", () => {
+  const selected = accountSelect?.value;
   if (!selected) return;
   setActiveAccount(selected);
-  accountStatusLabel.textContent = `Switched to ${selected}.`;
+  if (accountStatusLabel) accountStatusLabel.textContent = `Switched to ${selected}.`;
 });
-randomAccountBtn.addEventListener("click", () => {
+if (randomAccountBtn) randomAccountBtn.addEventListener("click", () => {
   const generated = randomAccountName();
   const accounts = loadAccounts();
   if (!accounts.includes(generated)) {
@@ -265,12 +276,12 @@ randomAccountBtn.addEventListener("click", () => {
     saveAccounts(accounts);
     renderAccountSelect(accounts);
   }
-  accountSelect.value = generated;
+  if (accountSelect) accountSelect.value = generated;
   setActiveAccount(generated);
-  accountStatusLabel.textContent = `Random login: ${generated}.`;
+  if (accountStatusLabel) accountStatusLabel.textContent = `Random login: ${generated}.`;
 });
 
 populateLocationSelect();
 initAccounts();
-locationSelect.value = "0";
+if (locationSelect) locationSelect.value = "0";
 setActiveLocation(cityOptions[0]);

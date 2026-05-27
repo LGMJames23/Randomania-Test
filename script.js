@@ -1,4 +1,6 @@
+
 document.addEventListener("DOMContentLoaded", function() {
+
     const screens = {
       home: document.getElementById("homeScreen"),
       account: document.getElementById("accountScreen"),
@@ -16,8 +18,9 @@ document.addEventListener("DOMContentLoaded", function() {
       cards: document.getElementById("cardsScreen")
     };
     console.debug("[Debug] Screens initialized:", screens);
+
     const PIG_GOAL = 100;
-    const PIG_DURATION_MS = 1 * 60 * 1000;
+    const PIG_DURATION_MS = 2 * 60 * 1000;
     const pigPanel = document.getElementById("pigPanel");
     const pigTimerLabel = document.getElementById("pigTimerLabel");
     const pigTotalLabel = document.getElementById("pigTotalLabel");
@@ -27,17 +30,12 @@ document.addEventListener("DOMContentLoaded", function() {
     const pigHoldBtn = document.getElementById("pigHoldBtn");
     const pigProgress = document.getElementById("pigProgress");
     const pigBtn = document.getElementById("pigBtn");
-    function turnLimit(){
-    const pigTurnLimit = document.getElementById("pigTurnLimitInput");
-    const pigTurnNumLabel = document.getElementById("pigTurnLimitBtn");
-        }
     const pigTimeStat = document.querySelector(".pig-stat--time");
     let pigPlaying = false;
     let pigTimerId = null;
     let pigEndsAt = 0;
     let pigBanked = 0;
     let pigTurn = 0;
-    let pigTurnNum = 0;
     let pigDisplayMsLeft = PIG_DURATION_MS;
 
     const triviaData = [
@@ -143,6 +141,12 @@ document.addEventListener("DOMContentLoaded", function() {
       if (!triviaData.length) {
         document.getElementById("triviaCategory").textContent = "No trivia questions loaded yet.";
         document.getElementById("triviaResult").textContent = "";
+        setImageWithFallback(document.getElementById("triviaImage"), "", fallbackTriviaImage);
+        [...document.querySelectorAll(".answer-btn")].forEach((btn) => {
+          btn.disabled = true;
+          btn.textContent = "-";
+          btn.onclick = null;
+        });
         return;
       }
       const item = nextTriviaItem();
@@ -170,6 +174,12 @@ document.addEventListener("DOMContentLoaded", function() {
       if (!item) {
         document.getElementById("sportName").textContent = "No sports data loaded yet.";
         document.getElementById("sportFact").textContent = "";
+        setImageWithFallback(document.getElementById("sportImage"), "", fallbackSportImage);
+        const sportVideoLink = document.getElementById("sportVideoLink");
+        if (sportVideoLink) {
+          sportVideoLink.href = "#";
+          sportVideoLink.textContent = "Watch highlights";
+        }
         return;
       }
       document.getElementById("sportName").textContent = item.sport;
@@ -204,6 +214,10 @@ document.addEventListener("DOMContentLoaded", function() {
     function setImageWithFallback(imgEl, primarySrc, fallbackSrc) {
       if(!imgEl) {
         console.warn("[Debug] setImageWithFallback: No imgEl");
+        return;
+      }
+      if (!primarySrc) {
+        imgEl.src = fallbackSrc;
         return;
       }
       imgEl.onerror = () => {
@@ -284,7 +298,7 @@ document.addEventListener("DOMContentLoaded", function() {
           "You",
           "42",
           "Happiness",
-          "Emptiness"
+          "Emptiness",
         ];
         result = `${pick(firstWordList)}${pick(secondWordList)}${pick(thirdWordList)}, ${name}!`;
       }
@@ -338,8 +352,7 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigTimerLabel) pigTimerLabel.textContent = formatPigTime(msLeft);
       if (pigTotalLabel) pigTotalLabel.textContent = `${pigBanked} / ${PIG_GOAL}`;
       if (pigTurnLabel) pigTurnLabel.textContent = String(pigTurn);
-      if (pigTurnNumLabel) pigTurnNumLabel.textContent = `${pigTurnNum} / ${pigTurnLimit}`
-      if (pigTimeStat) pigTimeStat.classList.toggle("pig-stat--urgent", pigPlaying && msLeft <= 20000);
+      if (pigTimeStat) pigTimeStat.classList.toggle("pig-stat--urgent", pigPlaying && msLeft <= 30000);
       syncPigPanelChrome();
     }
 
@@ -352,7 +365,6 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigTimerId) {
         clearInterval(pigTimerId);
         pigTimerId = null;
-        pigTurnNum = 0;
       }
       pigDisplayMsLeft = Math.max(0, pigEndsAt - Date.now());
       pigPlaying = false;
@@ -373,15 +385,15 @@ document.addEventListener("DOMContentLoaded", function() {
       }
       return false;
     }
-function 
+
     function tickPigTimer() {
       if (!pigPlaying) return;
       updatePigHud();
-      if (Date.now() >= pigEndsAt || pigTurnNum > turnLimit) {
+      if (Date.now() >= pigEndsAt) {
         if (pigBanked >= PIG_GOAL) {
           finishPig("win", `You win! Reached ${pigBanked} before time ran out.`);
         } else {
-          finishPig("You lose :(", `Time's up at ${pigBanked}. You needed ${PIG_GOAL} to win.`);
+          finishPig("lose", `Time's up at ${pigBanked}. Need ${PIG_GOAL} to win.`);
         }
       }
     }
@@ -389,14 +401,13 @@ function
     function startPig() {
       pigBanked = 0;
       pigTurn = 0;
-    pigTurnNum = 0;
       pigDisplayMsLeft = PIG_DURATION_MS;
       pigPlaying = true;
       pigEndsAt = Date.now() + PIG_DURATION_MS;
       if (pigBtn) pigBtn.textContent = "Stop Pig";
       setPigControlsEnabled(true);
       if (pigStatusLabel) {
-        pigStatusLabel.textContent = "Roll to build a turn. Hold to keep your numbers, but lose a turn. A 1 ends your turn with no points.";
+        pigStatusLabel.textContent = "Roll to build a turn. Hold to bank. A 1 ends your turn with no points.";
         delete pigStatusLabel.dataset.outcome;
       }
       updatePigHud();
@@ -425,7 +436,6 @@ function
         pigTurn = 0;
         if (pigStatusLabel) {
           pigStatusLabel.textContent = "Rolled 1 — turn lost. Roll again or Hold when you have points.";
-        pigTurnNum++;
         }
         updatePigHud();
         console.debug("[Debug] rollPig bust on 1");
@@ -437,7 +447,7 @@ function
       }
       updatePigHud();
       if (pigBanked + pigTurn >= PIG_GOAL) {
-        pigBanked += pigTurn
+        pigBanked += pigTurn;
         pigTurn = 0;
         checkPigWin();
       }
@@ -445,7 +455,6 @@ function
     }
 
     function holdPig() {
-        pigTurnNum++;
       if (!pigPlaying || Date.now() >= pigEndsAt) return;
       if (pigTurn <= 0) {
         if (pigStatusLabel) pigStatusLabel.textContent = "Nothing to hold — roll first.";
@@ -652,6 +661,24 @@ function
       }
     }
 
+    function renderSuggestionSummary() {
+      const label = document.getElementById("suggestionsInput");
+      if (!label) return;
+      try {
+        const raw = localStorage.getItem("Randomania Suggestions");
+        const parsed = raw ? JSON.parse(raw) : [];
+        const suggestions = Array.isArray(parsed) ? parsed : [];
+        if (!suggestions.length) {
+          label.textContent = "No saved suggestions yet. Click Add Suggestion to submit one.";
+          return;
+        }
+        const latest = suggestions[suggestions.length - 1];
+        label.textContent = `Saved ${suggestions.length} suggestion(s). Latest: ${latest}`;
+      } catch (_err) {
+        label.textContent = "No saved suggestions yet. Click Add Suggestion to submit one.";
+      }
+    }
+
     function generateCards() {
       const suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
       const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
@@ -680,7 +707,6 @@ function
       ["pigBtn", "click", playPig],
       ["pigRollBtn", "click", rollPig],
       ["pigHoldBtn", "click", holdPig],
-      ["pigTurnLimitBtn" "click", turnLimit],
       ["suggestionsBtn", "click", addSuggestion],
       ["cardsBtn", "click", generateCards]
     ];
@@ -699,6 +725,7 @@ function
 
 
     syncPigPanelChrome();
+    renderSuggestionSummary();
     randomizeTitle();
     showScreen("home");
     generateSport();
