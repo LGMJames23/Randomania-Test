@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", function() {
     console.debug("[Debug] Screens initialized:", screens);
 
     const PIG_GOAL = 100;
-    const PIG_DURATION_MS = 2 * 60 * 1000;
+    const PIG_DURATION_MS = 60 * 1000;
     const pigPanel = document.getElementById("pigPanel");
     const pigTimerLabel = document.getElementById("pigTimerLabel");
     const pigTotalLabel = document.getElementById("pigTotalLabel");
