@@ -23,6 +23,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     const PIG_GOAL = 100;
     const PIG_DURATION_MS = 60 * 1000;
+    const SUGGESTION_EMAIL_TO = "143994@mtsd.org";
     const pigPanel = document.getElementById("pigPanel");
     const pigTimerLabel = document.getElementById("pigTimerLabel");
     const pigTotalLabel = document.getElementById("pigTotalLabel");
@@ -33,12 +34,17 @@ document.addEventListener("DOMContentLoaded", function() {
     const pigProgress = document.getElementById("pigProgress");
     const pigBtn = document.getElementById("pigBtn");
     const pigTimeStat = document.querySelector(".pig-stat--time");
+    const pigTurnsLabel = document.getElementById("pigTurnsLabel");
+    const pigTurnLimitToggle = document.getElementById("pigTurnLimitToggle");
+    const pigTurnLimitInput = document.getElementById("pigTurnLimitInput");
     let pigPlaying = false;
     let pigTimerId = null;
     let pigEndsAt = 0;
     let pigBanked = 0;
     let pigTurn = 0;
     let pigDisplayMsLeft = PIG_DURATION_MS;
+    let pigTurnsUsed = 0;
+    let pigMaxTurns = null;
 
     const triviaData = [
     ];
@@ -378,6 +384,28 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigProgress) pigProgress.value = Math.min(PIG_GOAL, pigBanked);
     }
 
+    function getPigTurnLimit() {
+      const limitEnabled = Boolean(pigTurnLimitToggle && pigTurnLimitToggle.checked);
+      if (!limitEnabled) return null;
+      const parsed = Number(pigTurnLimitInput?.value);
+      if (!Number.isFinite(parsed)) return 12;
+      const clamped = Math.max(3, Math.min(50, Math.floor(parsed)));
+      if (pigTurnLimitInput) pigTurnLimitInput.value = String(clamped);
+      return clamped;
+    }
+
+    function setPigSetupEnabled(enabled) {
+      if (pigTurnLimitToggle) pigTurnLimitToggle.disabled = !enabled;
+      if (pigTurnLimitInput) pigTurnLimitInput.disabled = !enabled || !(pigTurnLimitToggle?.checked);
+    }
+
+    if (pigTurnLimitToggle) {
+      pigTurnLimitToggle.addEventListener("change", () => {
+        setPigSetupEnabled(!pigPlaying);
+        updatePigHud();
+      });
+    }
+
     function updatePigHud() {
       const msLeft = pigPlaying
         ? Math.max(0, pigEndsAt - Date.now())
@@ -385,6 +413,11 @@ document.addEventListener("DOMContentLoaded", function() {
       if (pigTimerLabel) pigTimerLabel.textContent = formatPigTime(msLeft);
       if (pigTotalLabel) pigTotalLabel.textContent = `${pigBanked} / ${PIG_GOAL}`;
       if (pigTurnLabel) pigTurnLabel.textContent = String(pigTurn);
+      if (pigTurnsLabel) {
+        pigTurnsLabel.textContent = pigMaxTurns
+          ? `${pigTurnsUsed} / ${pigMaxTurns}`
+          : `${pigTurnsUsed} / Unlimited`;
+      }
       if (pigTimeStat) pigTimeStat.classList.toggle("pig-stat--urgent", pigPlaying && msLeft <= 30000);
       syncPigPanelChrome();
     }
@@ -402,6 +435,7 @@ document.addEventListener("DOMContentLoaded", function() {
       pigDisplayMsLeft = Math.max(0, pigEndsAt - Date.now());
       pigPlaying = false;
       setPigControlsEnabled(false);
+      setPigSetupEnabled(true);
       if (pigBtn) pigBtn.textContent = "Play Pig";
       updatePigHud();
       if (pigStatusLabel) {
@@ -431,14 +465,33 @@ document.addEventListener("DOMContentLoaded", function() {
       }
     }
 
+    function consumePigTurn(reason) {
+      pigTurnsUsed += 1;
+      updatePigHud();
+      if (pigMaxTurns && pigTurnsUsed >= pigMaxTurns && pigBanked < PIG_GOAL) {
+        finishPig(
+          "lose",
+          `Turn limit reached (${pigTurnsUsed}/${pigMaxTurns}) at ${pigBanked}. Need ${PIG_GOAL} to win.`
+        );
+        return true;
+      }
+      if (pigStatusLabel && reason === "bust") {
+        pigStatusLabel.textContent = "Rolled 1 - turn lost. Next turn started.";
+      }
+      return false;
+    }
+
     function startPig() {
       pigBanked = 0;
       pigTurn = 0;
+      pigTurnsUsed = 0;
+      pigMaxTurns = getPigTurnLimit();
       pigDisplayMsLeft = PIG_DURATION_MS;
       pigPlaying = true;
       pigEndsAt = Date.now() + PIG_DURATION_MS;
       if (pigBtn) pigBtn.textContent = "Stop Pig";
       setPigControlsEnabled(true);
+      setPigSetupEnabled(false);
       if (pigStatusLabel) {
         pigStatusLabel.textContent = "Roll to build a turn. Hold to bank. A 1 ends your turn with no points.";
         delete pigStatusLabel.dataset.outcome;
@@ -467,9 +520,8 @@ document.addEventListener("DOMContentLoaded", function() {
       renderDice([roll]);
       if (roll === 1) {
         pigTurn = 0;
-        if (pigStatusLabel) {
-          pigStatusLabel.textContent = "Rolled 1 — turn lost. Roll again or Hold when you have points.";
-        }
+        if (consumePigTurn("bust")) return;
+        if (pigStatusLabel) pigStatusLabel.textContent = "Rolled 1 - turn lost. Roll for your next turn.";
         updatePigHud();
         console.debug("[Debug] rollPig bust on 1");
         return;
@@ -495,6 +547,7 @@ document.addEventListener("DOMContentLoaded", function() {
       }
       pigBanked += pigTurn;
       pigTurn = 0;
+      if (consumePigTurn("hold")) return;
       updatePigHud();
       if (checkPigWin()) return;
       if (pigStatusLabel) {
@@ -677,21 +730,41 @@ document.addEventListener("DOMContentLoaded", function() {
       console.warn("[Debug] randomScreenBtn not found");
     }
 
-    async function addSuggestion() {
-      const text = window.prompt("Enter your suggestion:");
-      if (!text || !text.trim()) return;
-      const trimmed = text.trim();
-      const submittedBy = localStorage.getItem("randomaniaActiveAccount") || "Guest";
-      let suggestions = [];
+    function openSuggestionEmailDraft(text, submittedBy) {
+      const body = encodeURIComponent(
+        `Randomania Suggestion\n\nSubmitted by: ${submittedBy}\n\n${text}`
+      );
+      const subject = encodeURIComponent("Randomania Suggestion");
+      const mailto = `mailto:${SUGGESTION_EMAIL_TO}?subject=${subject}&body=${body}`;
+      const popup = window.open(mailto, "_blank");
+      if (!popup) {
+        window.location.href = mailto;
+      }
+    }
+
+    function getStoredSuggestions() {
       try {
         const raw = localStorage.getItem("Randomania Suggestions");
         const parsed = raw ? JSON.parse(raw) : [];
-        suggestions = Array.isArray(parsed) ? parsed : [];
+        return Array.isArray(parsed) ? parsed : [];
       } catch (_err) {
-        suggestions = [];
+        return [];
       }
+    }
+
+    function saveStoredSuggestions(list) {
+      localStorage.setItem("Randomania Suggestions", JSON.stringify(list));
+    }
+
+    async function addSuggestion() {
+      const textInput = document.getElementById("suggestionTextInput");
+      const text = textInput?.value || "";
+      if (!text.trim()) return;
+      const trimmed = text.trim();
+      const submittedBy = localStorage.getItem("randomaniaActiveAccount") || "Guest";
+      const suggestions = getStoredSuggestions();
       suggestions.push(trimmed);
-      localStorage.setItem("Randomania Suggestions", JSON.stringify(suggestions));
+      saveStoredSuggestions(suggestions);
       const label = document.getElementById("suggestionsInput");
 
       let emailStatus = "";
@@ -717,25 +790,46 @@ document.addEventListener("DOMContentLoaded", function() {
       if (label) {
         label.textContent = `Saved ${suggestions.length} suggestion(s). Latest: ${trimmed}${emailStatus}`;
       }
+      if (textInput) textInput.value = "";
+      openSuggestionEmailDraft(trimmed, submittedBy);
+      renderSuggestionSummary();
       trackInteraction("submit_suggestion");
     }
 
     function renderSuggestionSummary() {
       const label = document.getElementById("suggestionsInput");
+      const listEl = document.getElementById("suggestionsList");
       if (!label) return;
-      try {
-        const raw = localStorage.getItem("Randomania Suggestions");
-        const parsed = raw ? JSON.parse(raw) : [];
-        const suggestions = Array.isArray(parsed) ? parsed : [];
-        if (!suggestions.length) {
-          label.textContent = "No saved suggestions yet. Click Add Suggestion to submit one.";
-          return;
-        }
-        const latest = suggestions[suggestions.length - 1];
-        label.textContent = `Saved ${suggestions.length} suggestion(s). Latest: ${latest}`;
-      } catch (_err) {
+      const suggestions = getStoredSuggestions();
+      if (!suggestions.length) {
         label.textContent = "No saved suggestions yet. Click Add Suggestion to submit one.";
+        if (listEl) listEl.innerHTML = "";
+        return;
       }
+      const latest = suggestions[suggestions.length - 1];
+      label.textContent = `Saved ${suggestions.length} suggestion(s). Latest: ${latest}`;
+      if (!listEl) return;
+      const recent = suggestions.slice(-10).reverse();
+      listEl.innerHTML = recent
+        .map((item) => `<li class="suggestion-item">${item}</li>`)
+        .join("");
+    }
+
+    function emailLatestSuggestion() {
+      const suggestions = getStoredSuggestions();
+      const latest = suggestions[suggestions.length - 1];
+      if (!latest) {
+        const label = document.getElementById("suggestionsInput");
+        if (label) label.textContent = "Add a suggestion first, then email it.";
+        return;
+      }
+      const submittedBy = localStorage.getItem("randomaniaActiveAccount") || "Guest";
+      openSuggestionEmailDraft(latest, submittedBy);
+    }
+
+    function clearSuggestions() {
+      localStorage.removeItem("Randomania Suggestions");
+      renderSuggestionSummary();
     }
 
     function generateCards() {
@@ -767,6 +861,8 @@ document.addEventListener("DOMContentLoaded", function() {
       ["pigRollBtn", "click", rollPig],
       ["pigHoldBtn", "click", holdPig],
       ["suggestionsBtn", "click", addSuggestion],
+      ["suggestionsEmailBtn", "click", emailLatestSuggestion],
+      ["suggestionsClearBtn", "click", clearSuggestions],
       ["cardsBtn", "click", generateCards]
     ];
 
@@ -787,6 +883,7 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 
 
+    setPigSetupEnabled(true);
     syncPigPanelChrome();
     renderSuggestionSummary();
     randomizeTitle();

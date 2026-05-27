@@ -164,6 +164,15 @@
             </p>
           </header>
 
+          <div class="pig-options">
+            <label class="pig-turn-limit-toggle">
+              <input type="checkbox" id="pigTurnLimitToggle" />
+              Enable turn limit
+            </label>
+            <label for="pigTurnLimitInput">Max turns</label>
+            <input id="pigTurnLimitInput" type="number" min="3" max="50" value="12" />
+          </div>
+
           <div class="pig-hud" role="group" aria-label="Pig game stats">
             <div class="pig-stat pig-stat--time">
               <span class="pig-stat-label">Time</span>
@@ -177,18 +186,22 @@
               <span class="pig-stat-label">This turn</span>
               <span id="pigTurnLabel" class="pig-stat-value">0</span>
             </div>
+            <div class="pig-stat pig-stat--limit">
+              <span class="pig-stat-label">Turn cap</span>
+              <span id="pigTurnsLabel" class="pig-stat-value">Unlimited</span>
+            </div>
           </div>
 
           <label class="pig-progress-label" for="pigProgress">Progress to 100</label>
           <progress id="pigProgress" class="pig-progress" max="100" value="0"></progress>
 
           <p id="pigStatusLabel" class="pig-status" role="status" aria-live="polite">
-            Press <strong>Play Pig</strong> to start the 2-minute challenge.
+            Press <strong>Play Pig</strong> to start the 1-minute challenge.
           </p>
 
           <div class="controls pig-controls">
             <button id="pigRollBtn" type="button" class="pig-action pig-action--roll" disabled>Roll</button>
-            <button id="pigHoldBtn" type="button" class="pig-action pig-action--hold" disabled>Bank(HOLD)</button>
+            <button id="pigHoldBtn" type="button" class="pig-action pig-action--hold" disabled>Hold</button>
           </div>
         </section>
       </section>
@@ -213,8 +226,16 @@
 
       <section class="screen" id="suggestionsScreen">
         <h2>Random Suggestions</h2>
-        <p id="suggestionsInput"></p>
-        <button id="suggestionsBtn">Add Suggestion</button>
+        <div class="suggestions-panel">
+          <p id="suggestionsInput">No saved suggestions yet.</p>
+          <textarea id="suggestionTextInput" placeholder="Type your suggestion here..."></textarea>
+          <div class="controls">
+            <button id="suggestionsBtn" type="button">Submit Suggestion</button>
+            <button id="suggestionsEmailBtn" type="button">Email Me Now</button>
+            <button id="suggestionsClearBtn" type="button">Clear Saved</button>
+          </div>
+          <ul id="suggestionsList" class="suggestions-list"></ul>
+        </div>
       </section>
 
       <section class="screen" id="cardsScreen">

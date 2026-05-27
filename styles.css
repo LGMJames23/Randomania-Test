@@ -158,9 +158,21 @@ button:disabled {
   line-height: 1.45;
 }
 
+.pig-options {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.pig-options input[type="number"] {
+  width: 90px;
+}
+
 .pig-hud {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin: 14px 0 10px;
 }
@@ -276,6 +288,35 @@ button:disabled {
 .pig-btn--stop {
   background: #fecaca;
   color: #7f1d1d;
+}
+
+.suggestions-panel {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px;
+  background: #ffffff;
+}
+
+#suggestionTextInput {
+  width: 100%;
+  min-height: 90px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  padding: 10px;
+  font-family: inherit;
+  margin-bottom: 10px;
+  resize: vertical;
+}
+
+.suggestions-list {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.suggestion-item {
+  line-height: 1.35;
 }
 
 @media (max-width: 560px) {
