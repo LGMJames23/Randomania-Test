@@ -1,5 +1,7 @@
 
 document.addEventListener("DOMContentLoaded", function() {
+    const API_BASE_URL = window.RANDOMANIA_API_BASE_URL || "http://localhost:5000";
+    const SESSION_STORAGE_KEY = "randomaniaSessionId";
 
     const screens = {
       home: document.getElementById("homeScreen"),
@@ -111,6 +113,37 @@ document.addEventListener("DOMContentLoaded", function() {
         console.debug("[Debug] showScreen -> now active:", key);
       } else {
         console.error("[Debug] showScreen: No such screen:", key);
+      }
+    }
+
+    function getSessionId() {
+      let sessionId = localStorage.getItem(SESSION_STORAGE_KEY);
+      if (!sessionId) {
+        if (window.crypto?.randomUUID) {
+          sessionId = window.crypto.randomUUID();
+        } else {
+          sessionId = `session-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+        }
+        localStorage.setItem(SESSION_STORAGE_KEY, sessionId);
+      }
+      return sessionId;
+    }
+
+    async function trackInteraction(action) {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/interactions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            session_id: getSessionId(),
+            action: action || "unknown"
+          })
+        });
+        if (!response.ok) return;
+        const data = await response.json();
+        console.debug("[Debug] interaction tracked:", action, data);
+      } catch (_err) {
+        // Backend tracking is optional for UI behavior.
       }
     }
 
@@ -624,6 +657,7 @@ document.addEventListener("DOMContentLoaded", function() {
         console.debug("[Debug] Screen button clicked:", btn.dataset.screen);
         showScreen(btn.dataset.screen);
         randomizeTitle();
+        trackInteraction(`open_screen_${btn.dataset.screen}`);
         if (btn.dataset.screen === "trivia") nextTriviaQuestion();
       });
     });
@@ -635,6 +669,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const key = pick(keys);
         showScreen(key);
         randomizeTitle();
+        trackInteraction("random_screen");
         console.debug("[Debug] randomScreenBtn picked:", key);
         if (key === "trivia") nextTriviaQuestion();
       });
@@ -642,9 +677,11 @@ document.addEventListener("DOMContentLoaded", function() {
       console.warn("[Debug] randomScreenBtn not found");
     }
 
-    function addSuggestion() {
+    async function addSuggestion() {
       const text = window.prompt("Enter your suggestion:");
       if (!text || !text.trim()) return;
+      const trimmed = text.trim();
+      const submittedBy = localStorage.getItem("randomaniaActiveAccount") || "Guest";
       let suggestions = [];
       try {
         const raw = localStorage.getItem("Randomania Suggestions");
@@ -653,12 +690,34 @@ document.addEventListener("DOMContentLoaded", function() {
       } catch (_err) {
         suggestions = [];
       }
-      suggestions.push(text.trim());
+      suggestions.push(trimmed);
       localStorage.setItem("Randomania Suggestions", JSON.stringify(suggestions));
       const label = document.getElementById("suggestionsInput");
-      if (label) {
-        label.textContent = `Saved ${suggestions.length} suggestion(s). Latest: ${text.trim()}`;
+
+      let emailStatus = "";
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/suggestions`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            text: trimmed,
+            submitted_by: submittedBy
+          })
+        });
+        if (response.ok) {
+          const result = await response.json();
+          emailStatus = result.email_sent ? " | Email sent." : " | Saved (email pending).";
+        } else {
+          emailStatus = " | Saved locally (server unavailable).";
+        }
+      } catch (_err) {
+        emailStatus = " | Saved locally (server unavailable).";
       }
+
+      if (label) {
+        label.textContent = `Saved ${suggestions.length} suggestion(s). Latest: ${trimmed}${emailStatus}`;
+      }
+      trackInteraction("submit_suggestion");
     }
 
     function renderSuggestionSummary() {
@@ -716,7 +775,11 @@ document.addEventListener("DOMContentLoaded", function() {
       if(el) {
         el.addEventListener(evt, function(ev) {
           console.debug(`[Debug] Button #${id} event:`, evt, ev);
-          fn(ev);
+          const result = fn(ev);
+          if (result && typeof result.catch === "function") {
+            result.catch((err) => console.error(`[Debug] Async handler failed for ${id}:`, err));
+          }
+          trackInteraction(`event_${id}_${evt}`);
         });
       } else {
         console.warn(`[Debug] eventBindings: Element with id '${id}' not found`);
