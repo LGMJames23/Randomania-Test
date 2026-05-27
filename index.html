@@ -240,8 +240,13 @@
 
       <section class="screen" id="cardsScreen">
         <h2>Random Cards</h2>
+        <div class="controls">
+          <input id="cardsCountInput" type="number" min="1" max="10" value="3" aria-label="Number of cards" />
+          <button id="cardsBtn">Generate Cards</button>
+        </div>
+        <p class="screen-hint">Max cards shown cleanly: 10</p>
         <p id="cardsOutput"></p>
-        <button id="cardsBtn">Generate Cards</button>
+        <div id="cardsVisuals" class="cards-grid" aria-label="Card results"></div>
       </section>
 
       <section class="screen" id="coinflipScreen">

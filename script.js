@@ -832,16 +832,60 @@ document.addEventListener("DOMContentLoaded", function() {
       renderSuggestionSummary();
     }
 
+    function cardFaceSvg(rank, suit) {
+      const isRed = suit === "Hearts" || suit === "Diamonds";
+      const color = isRed ? "#dc2626" : "#111827";
+      const suitSymbolMap = {
+        Hearts: "♥",
+        Diamonds: "♦",
+        Clubs: "♣",
+        Spades: "♠"
+      };
+      const suitSymbol = suitSymbolMap[suit] || "?";
+      return `data:image/svg+xml;utf8,${encodeURIComponent(
+        `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 180'>
+          <rect x='4' y='4' width='112' height='172' rx='12' fill='white' stroke='#94a3b8' stroke-width='3'/>
+          <text x='18' y='28' font-size='20' font-family='Arial' font-weight='700' fill='${color}'>${rank}</text>
+          <text x='18' y='50' font-size='20' font-family='Arial' fill='${color}'>${suitSymbol}</text>
+          <text x='60' y='103' text-anchor='middle' font-size='48' font-family='Arial' fill='${color}'>${suitSymbol}</text>
+          <g transform='rotate(180 60 90)'>
+            <text x='18' y='28' font-size='20' font-family='Arial' font-weight='700' fill='${color}'>${rank}</text>
+            <text x='18' y='50' font-size='20' font-family='Arial' fill='${color}'>${suitSymbol}</text>
+          </g>
+        </svg>`
+      )}`;
+    }
+
+    function renderCards(cards) {
+      const wrap = document.getElementById("cardsVisuals");
+      if (!wrap) return;
+      wrap.innerHTML = "";
+      cards.forEach((card) => {
+        const img = document.createElement("img");
+        img.className = "card-img";
+        img.alt = `${card.rank} of ${card.suit}`;
+        img.src = cardFaceSvg(card.rank, card.suit);
+        wrap.appendChild(img);
+      });
+    }
+
     function generateCards() {
       const suits = ["Hearts", "Diamonds", "Clubs", "Spades"];
       const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
-      const count = rand(1, 5);
+      let count = Number(document.getElementById("cardsCountInput")?.value);
+      if (!Number.isFinite(count)) count = 1;
+      count = Math.max(1, Math.min(10, Math.floor(count)));
+      const countInput = document.getElementById("cardsCountInput");
+      if (countInput) countInput.value = String(count);
       const cards = [];
       for (let i = 0; i < count; i += 1) {
-        cards.push(`${pick(ranks)} of ${pick(suits)}`);
+        cards.push({ rank: pick(ranks), suit: pick(suits) });
       }
       const output = document.getElementById("cardsOutput");
-      if (output) output.textContent = cards.join(", ");
+      if (output) {
+        output.textContent = cards.map((card) => `${card.rank} of ${card.suit}`).join(", ");
+      }
+      renderCards(cards);
     }
 
     const eventBindings = [

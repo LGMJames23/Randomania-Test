@@ -353,6 +353,22 @@ button:disabled {
   border-radius: 999px;
 }
 
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 10px;
+  max-width: 680px;
+  margin-top: 8px;
+}
+
+.card-img {
+  width: 96px;
+  height: 140px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+}
+
 .home-info-card {
   margin-top: 14px;
   padding: 14px;
