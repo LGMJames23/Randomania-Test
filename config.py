@@ -35,8 +35,6 @@ class Config:
         return bool(
             cls.SMTP_HOST
             and cls.SMTP_PORT
-            and cls.SMTP_USER
-            and cls.SMTP_PASS
             and cls.SMTP_FROM
             and cls.SUGGESTION_RECIPIENTS
         )

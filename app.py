@@ -104,6 +104,17 @@ def login_placeholder():
     return not_implemented_response()
 
 
+@app.post("/api/smtp-test")
+def smtp_test():
+    body = request.get_json(silent=True) or {}
+    test_text = str(body.get("text", "SMTP test from Randomania backend")).strip()
+    try:
+        send_suggestion_email(test_text, "SMTP Tester")
+        return jsonify({"ok": True, "message": "SMTP test email sent."})
+    except Exception as err:  # noqa: BLE001
+        return jsonify({"ok": False, "message": str(err)}), 500
+
+
 if __name__ == "__main__":
     init_db()
     app.run(host="0.0.0.0", port=Config.PORT, debug=(Config.PORT == 5000))

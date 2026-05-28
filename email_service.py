@@ -1,27 +1,30 @@
 import smtplib
-from email.message import EmailMessage
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
-from config import Config
+def send_suggestion_email(visitor_email, suggestion_text):  
+    smtp_server = "smtp-mail.outlook.com"
+    smtp_port = 587
+    username = "your_email@outlook.com"
+    password = "YOUR_APP_PASSWORD"  
 
+    recipients = ["143994@mtsd.org", "thaguy10113519@outlook.com"]
 
-def send_suggestion_email(suggestion_text: str, submitted_by: str) -> None:
-    if not Config.smtp_configured():
-        raise RuntimeError(
-            "SMTP is not fully configured. Set SMTP_* and SUGGESTION_RECIPIENTS in .env."
-        )
+    msg = MIMEMultipart()
+    msg['From'] = username
+    msg['To'] = ", ".join(recipients)
+    msg['Reply-To'] = visitor_email  
+    msg['Subject'] = "New Website Suggestion"
 
-    msg = EmailMessage()
-    msg["Subject"] = "Randomania Suggestion Submission"
-    msg["From"] = Config.SMTP_FROM
-    msg["To"] = ", ".join(Config.SUGGESTION_RECIPIENTS)
-    msg.set_content(
-        f"Randomania suggestion received.\n\n"
-        f"Submitted by: {submitted_by}\n\n"
-        f"Suggestion:\n{suggestion_text}\n"
-    )
+    body = f"You received a new suggestion:\n\n{suggestion_text}"
+    msg.attach(MIMEText(body, 'plain'))
 
-    with smtplib.SMTP(Config.SMTP_HOST, Config.SMTP_PORT, timeout=20) as smtp:
-        if Config.SMTP_USE_TLS:
-            smtp.starttls()
-        smtp.login(Config.SMTP_USER, Config.SMTP_PASS)
-        smtp.send_message(msg)
+    try:
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls() 
+        server.login(username, password)
+        server.sendmail(username, recipients, msg.as_string())
+        server.quit()
+        print("Suggestion sent successfully!")
+    except Exception as e:
+        print(f"Failed to send suggestion email: {e}")

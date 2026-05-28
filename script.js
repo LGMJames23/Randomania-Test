@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const PIG_GOAL = 100;
     const PIG_DURATION_MS = 60 * 1000;
     const SUGGESTION_EMAIL_TO = "143994@mtsd.org";
+    const SUGGESTION_EMAIL_CC = "thaguy10113519@outlook.com";
     const pigPanel = document.getElementById("pigPanel");
     const pigTimerLabel = document.getElementById("pigTimerLabel");
     const pigTotalLabel = document.getElementById("pigTotalLabel");
@@ -735,7 +736,7 @@ document.addEventListener("DOMContentLoaded", function() {
         `Randomania Suggestion\n\nSubmitted by: ${submittedBy}\n\n${text}`
       );
       const subject = encodeURIComponent("Randomania Suggestion");
-      const mailto = `mailto:${SUGGESTION_EMAIL_TO}?subject=${subject}&body=${body}`;
+      const mailto = `mailto:${SUGGESTION_EMAIL_TO}?cc=${encodeURIComponent(SUGGESTION_EMAIL_CC)}&subject=${subject}&body=${body}`;
       const popup = window.open(mailto, "_blank");
       if (!popup) {
         window.location.href = mailto;
@@ -779,12 +780,14 @@ document.addEventListener("DOMContentLoaded", function() {
         });
         if (response.ok) {
           const result = await response.json();
-          emailStatus = result.email_sent ? " | Email sent." : " | Saved (email pending).";
+          emailStatus = result.email_sent
+            ? " | Backend email sent."
+            : ` | Backend email failed: ${result.email_error || "Unknown error"}`;
         } else {
-          emailStatus = " | Saved locally (server unavailable).";
+          emailStatus = ` | Server error (${response.status})`;
         }
       } catch (_err) {
-        emailStatus = " | Saved locally (server unavailable).";
+        emailStatus = " | Backend not reachable; opened email draft instead.";
       }
 
       if (label) {
@@ -856,6 +859,66 @@ document.addEventListener("DOMContentLoaded", function() {
       )}`;
     }
 
+    const PROVIDED_CARD_IMAGE_MAP = {
+      "2_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_2_of_diamonds-c80a4a8a-e656-4e4b-84be-732cb37ce022.png",
+      "2_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_2_of_hearts-c414398c-341a-427d-bafd-4cc434e610f0.png",
+      "2_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_2_of_spades-2d0cf571-641a-4cc2-a1ba-006e3e29554d.png",
+      "2_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_2_of_BBclubs-9c454d92-1abb-4cd2-83be-29dda527374e.png",
+      "3_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_3_of_diamonds-d47b7f41-9877-44b6-9c84-81ad846537bc.png",
+      "3_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_3_of_hearts-f43d0200-ffb0-4c0c-9bbc-e378f36c345d.png",
+      "3_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_3_of_spades-21d3f255-b7e5-443f-9872-596925f731b8.png",
+      "3_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_3_of_clubs-04e0509f-f9c8-4b4c-8df1-d65fb991d28f.png",
+      "4_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_4_of_diamonds-4aec72b6-d4e5-4a4c-abf6-163ed32fdbc3.png",
+      "4_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_4_of_hearts-029c5ac8-575b-4564-bfeb-b1df56bc00d8.png",
+      "4_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_4_of_spades-5b2aa605-7f72-4d4c-ba08-9c948817634b.png",
+      "4_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_4_of_clubs-5eec58d5-795c-45bd-ba27-764aeb7802b7.png",
+      "5_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_5_of_diamonds-ac424fb3-adc2-439a-a254-04a1ddaee3b8.png",
+      "5_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_5_of_hearts-2d0a9ad4-18bc-4e50-aefd-379ac6836a48.png",
+      "5_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_5_of_spades-418a6424-d450-4b17-8e1a-61cce5d5afcd.png",
+      "5_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_5_of_clubs-f6029711-eeef-422c-84fd-39b750450106.png",
+      "6_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_6_of_diamonds-9fc10dcc-b0f3-445a-8e76-1bf45ae25d44.png",
+      "6_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_6_of_hearts-458a5f40-7a01-46ba-88f0-a0c5253df050.png",
+      "6_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_6_of_spades-c1c7abd9-9a8c-41bf-bf7c-644d93bbc62d.png",
+      "6_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_6_of_clubs-ff09c5ff-b50e-4eb9-a4bd-3e7f5c2c40e2.png",
+      "7_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_7_of_diamonds-71e590ed-1d9b-4572-ae81-7f0cb317d684.png",
+      "7_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_7_of_hearts-225bf1c2-105e-426c-8f9c-108096701619.png",
+      "7_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_7_of_spades-fdb96472-48c0-418b-94a5-367dd8e22d1c.png",
+      "7_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_7_of_clubs-e4145da6-4360-4fe8-be7c-f8b72d230bf4.png",
+      "8_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_8_of_diamonds-22aa74f5-f43e-44f1-9af4-8a62bbf7cd25.png",
+      "8_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_8_of_hearts-bdbdeaa3-e7af-4970-b82d-99890aea0627.png",
+      "8_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_8_of_spades-8bcb48bf-5aba-4524-8e14-1bd694404b6d.png",
+      "8_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_8_of_clubs-f67d14d5-94fc-4fc7-9bb8-e2c5f6586ca2.png",
+      "9_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_9_of_diamonds-1cee1e2d-99a1-41fa-ad67-c36f77d23f6d.png",
+      "9_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_9_of_hearts-14dc661e-52b0-4428-9f2d-2d5053e34bc6.png",
+      "9_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_9_of_spades-9597dc4f-23c5-4d67-8de1-c596392ab51f.png",
+      "9_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_9_of_clubs-0697ef0a-6b62-46c3-8167-d225f920f134.png",
+      "10_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_10_of_diamonds-e3c2a2dd-e4fd-405c-bdd6-956dbaba9bac.png",
+      "10_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_10_of_hearts-8acba744-cae8-4419-847c-46cbd1019ce2.png",
+      "10_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_10_of_spades-6ed1a7d1-1bee-4b4d-978e-7b12107d6b08.png",
+      "10_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_10_of_clubs-c6cfb615-f2f0-431e-9077-2c22da26eba1.png",
+      "J_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_jack_of_diamonds-144aac6d-1f9c-465e-923c-463a393eccfc.png",
+      "J_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_jack_of_hearts-a7cba045-5448-4d53-849b-6879a0aefdb0.png",
+      "J_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_jack_of_spades-384c22a7-8926-4adf-8de0-83fccfd022ea.png",
+      "J_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_jack_of_clubs-a3823f9f-784d-46e1-8db8-0cf79256920b.png",
+      "Q_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_queen_of_diamonds-e8c88ca7-c616-4e79-b278-906ca15d8b51.png",
+      "Q_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_queen_of_hearts-5d27afff-976b-4bb2-830a-8c746bf8e868.png",
+      "Q_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_queen_of_spades-04075fe7-4ae1-478d-9079-633eeaa14011.png",
+      "Q_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_queen_of_clubs-35cb88ef-1999-4656-8399-478d1bcf6518.png",
+      "K_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_king_of_diamonds-ff569dc4-09d6-47d3-9c16-cc4f988bb031.png",
+      "K_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_king_of_hearts-bfa0170b-5371-4852-96fe-1ba170859aeb.png",
+      "K_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_king_of_spades-5b122842-498f-4951-aea5-8cddc5a569c9.png",
+      "K_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_king_of_clubs-f18208c8-0172-48c5-8cdb-c4f844500326.png",
+      "A_of_diamonds": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_ace_of_diamonds-ccd99ce6-0cab-44fe-8052-bc9f3836cb1e.png",
+      "A_of_hearts": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_ace_of_hearts-4cd2cc9e-0706-45e0-958a-0e3cfadfabce.png",
+      "A_of_spades": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_ace_of_spades-988e6891-fec2-473d-a611-2746f52b3b5c.png",
+      "A_of_clubs": "file:///C:/Users/143994/.cursor/projects/c-Users-143994-Downloads-Randomania/assets/c__Users_143994_AppData_Roaming_Cursor_User_workspaceStorage_empty-window_images_ace_of_clubs-434a3c92-129a-4e21-aade-5b949dd65d2e.png"
+    };
+
+    function cardImageSrc(rank, suit) {
+      const key = `${rank}_of_${String(suit).toLowerCase()}`;
+      return PROVIDED_CARD_IMAGE_MAP[key] || cardFaceSvg(rank, suit);
+    }
+
     function renderCards(cards) {
       const wrap = document.getElementById("cardsVisuals");
       if (!wrap) return;
@@ -864,7 +927,11 @@ document.addEventListener("DOMContentLoaded", function() {
         const img = document.createElement("img");
         img.className = "card-img";
         img.alt = `${card.rank} of ${card.suit}`;
-        img.src = cardFaceSvg(card.rank, card.suit);
+        img.src = cardImageSrc(card.rank, card.suit);
+        img.onerror = () => {
+          img.onerror = null;
+          img.src = cardFaceSvg(card.rank, card.suit);
+        };
         wrap.appendChild(img);
       });
     }
