@@ -3,11 +3,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 def send_suggestion_email(visitor_email, suggestion_text):  
-    if (outlook==true){
     smtp_server = "smtp-mail.outlook.com"
-    } else if(gmail==true){
-        smtp_server = "smtp.mail.gmail.com"
-    }
     smtp_port = 587
     username = "your_email@outlook.com"
     password = "YOUR_APP_PASSWORD"  
